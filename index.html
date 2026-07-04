@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="作業工賃記録">
+<meta name="theme-color" content="#F5F1E9">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>作業工賃記録</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F1E9; --surface:#ffffff; --surface-2:#FBF9F4;
+    --ink:#2B2A27; --muted:#8A8478; --line:#E6DFD2; --line-2:#EFEAE0;
+    --green:#2E7D6B; --green-d:#25634F; --green-bg:#E4F1EC;
+    --amber:#E0952F; --amber-bg:#FBEFDC;
+    --red:#C1544E; --red-bg:#F7E4E2;
+    --blue:#3F78B5; --blue-bg:#E3EDF7;
+    --shadow:0 1px 2px rgba(43,42,39,.06), 0 6px 16px rgba(43,42,39,.05);
+    --r:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  body{padding-bottom:88px;-webkit-text-size-adjust:100%;}
+  button{font-family:inherit;cursor:pointer;}
+
+  header{position:sticky;top:0;z-index:30;background:rgba(245,241,233,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  .head-top{display:flex;align-items:center;gap:12px;padding:12px 16px 8px;}
+  .brand{font-size:18px;font-weight:800;letter-spacing:.01em;}
+  .brand small{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;}
+  .facility-tabs{display:flex;gap:8px;padding:2px 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .fac-tab{flex:0 0 auto;padding:10px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);
+    font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;}
+  .fac-tab.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:var(--shadow);}
+  .fac-tab.all{border-style:dashed;}
+  .fac-tab.all.active{border-style:solid;background:var(--ink);border-color:var(--ink);}
+
+  .datebar{display:flex;align-items:center;gap:10px;padding:0 16px 12px;}
+  .datebar .navbtn{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);
+    font-size:20px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;}
+  .date-main{flex:1;text-align:center;}
+  .date-main .d{font-size:20px;font-weight:800;line-height:1.1;}
+  .date-main .w{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px;}
+  .date-main .w.sun{color:var(--red);} .date-main .w.sat{color:var(--blue);}
+  .today-btn{padding:9px 14px;border-radius:11px;border:1.5px solid var(--green);background:var(--green-bg);color:var(--green-d);font-weight:800;font-size:13px;}
+
+  main{padding:16px;max-width:1100px;margin:0 auto;}
+  .view{display:none;} .view.active{display:block;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);}
+
+  .seg{display:flex;gap:6px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:14px;padding:5px;margin-bottom:14px;}
+  .seg button{flex:1;padding:14px 8px;border:none;border-radius:10px;background:transparent;font-size:17px;font-weight:800;color:var(--muted);}
+  .seg button.active{background:var(--green);color:#fff;box-shadow:var(--shadow);}
+  .seg.type-seg button{padding:12px 4px;font-size:14.5px;white-space:nowrap;}
+  #typeSegE button.active{background:var(--green);}
+  #typeSegM button.active{background:var(--ink);}
+
+  .entry-status{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;padding:0 2px;flex-wrap:wrap;}
+  .entry-status b{font-size:26px;font-weight:800;color:var(--green-d);}
+  .entry-status span{font-size:14px;color:var(--muted);font-weight:700;}
+  .entry-status .other{font-size:13px;color:var(--muted);font-weight:700;}
+  .hint{font-size:12.5px;color:var(--muted);margin:0 2px 14px;line-height:1.6;}
+
+  .name-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .name-btn{position:relative;min-height:104px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 8px;overflow:hidden;}
+  .name-btn:active{transform:scale(.97);}
+  .name-btn .nm{font-size:17px;font-weight:800;line-height:1.2;text-align:center;pointer-events:none;}
+  .name-btn .sess{display:flex;gap:6px;pointer-events:none;}
+  .name-btn .pill{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1.5px solid var(--line);}
+  .name-btn .pill.on{background:var(--green);color:#fff;border-color:var(--green);}
+  .name-btn .wg{font-size:12.5px;font-weight:800;color:var(--green-d);min-height:15px;pointer-events:none;}
+  .name-btn .mark{font-size:30px;font-weight:800;line-height:1;color:var(--line);pointer-events:none;}
+  .name-btn.active-on .mark{color:var(--green-d);}
+  .name-btn.active-on{background:var(--green-bg);border-color:var(--green);}
+  .name-btn.rest{background:var(--amber-bg);border-color:var(--amber);}
+  .name-btn.absent{background:var(--red-bg);border-color:var(--red);}
+  .name-btn .abs-badge{position:absolute;top:0;right:0;font-size:11px;font-weight:800;padding:5px 9px;border-bottom-left-radius:12px;
+    background:var(--surface-2);color:var(--muted);border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);}
+  .name-btn.rest .abs-badge{background:var(--amber);color:#fff;border-color:var(--amber);}
+  .name-btn.absent .abs-badge{background:var(--red);color:#fff;border-color:var(--red);}
+  .empty-note{padding:40px 16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.7;}
+  .entry-spacer{height:90px;}
+
+  .save-bar{position:fixed;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom));z-index:35;display:none;
+    padding:10px 16px;background:rgba(245,241,233,.95);backdrop-filter:blur(8px);border-top:1px solid var(--line);
+    align-items:center;gap:12px;justify-content:space-between;max-width:1100px;margin:0 auto;}
+  .save-bar.show{display:flex;}
+  .save-bar .sl{font-size:14px;font-weight:800;}
+  .save-bar .sl small{display:block;font-weight:600;color:var(--muted);font-size:11.5px;}
+  .save-bar .btn{padding:14px 26px;font-size:16px;}
+
+  .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 14px;flex-wrap:wrap;}
+  .sec-head h2{font-size:18px;font-weight:800;margin:0;}
+  .sec-head .sub{font-size:12.5px;color:var(--muted);font-weight:600;}
+  .sec-head .acts{display:flex;gap:8px;}
+  .btn{padding:11px 16px;border-radius:12px;border:1.5px solid var(--green);background:var(--green);color:#fff;font-weight:800;font-size:14px;box-shadow:var(--shadow);}
+  .btn.ghost{background:var(--surface);color:var(--green-d);}
+  .btn.sm{padding:8px 12px;font-size:13px;}
+
+  .grid-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);}
+  table.grid{border-collapse:collapse;font-size:12.5px;white-space:nowrap;min-width:100%;}
+  table.grid th,table.grid td{border:1px solid var(--line-2);text-align:center;padding:0;}
+  table.grid thead th{background:var(--surface-2);position:sticky;top:0;z-index:2;font-weight:800;}
+  table.grid .colname{writing-mode:vertical-rl;text-orientation:upright;height:98px;padding:8px 3px;font-size:12px;font-weight:700;letter-spacing:.06em;}
+  table.grid td.day,table.grid th.day{position:sticky;left:0;background:var(--surface-2);z-index:1;font-weight:800;min-width:34px;}
+  table.grid td.dow,table.grid th.dow{position:sticky;left:34px;background:var(--surface-2);z-index:1;min-width:30px;color:var(--muted);font-weight:700;}
+  table.grid thead th.day,table.grid thead th.dow{z-index:3;}
+  table.grid td.cell{min-width:34px;height:34px;font-weight:700;}
+  table.grid td.v-1{background:var(--green-bg);color:var(--green-d);}
+  table.grid td.v-2{background:#CDE8DE;color:var(--green-d);font-weight:800;}
+  table.grid td.v-rest{background:var(--amber-bg);color:var(--amber);}
+  table.grid td.v-absent{background:var(--red-bg);color:var(--red);}
+  table.grid tr.sun td.day,table.grid tr.sun td.dow{color:var(--red);}
+  table.grid tr.sat td.day,table.grid tr.sat td.dow{color:var(--blue);}
+  table.grid td.total,table.grid th.total{font-weight:800;background:#EEF4F1;color:var(--green-d);min-width:44px;}
+  table.grid tr.totrow td{background:var(--surface-2);font-weight:800;border-top:2px solid var(--line);}
+  table.grid.striped tr.zeb td.cell{background:#EDEBE6;}
+  table.grid.striped td.cell{color:var(--ink);}
+
+  .wage-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+  .wage-card{padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);}
+  .wage-card .wn{font-size:16px;font-weight:800;}
+  .wage-card .wr{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;}
+  .wage-card .wr .lab{font-size:12px;color:var(--muted);font-weight:700;}
+  .wage-card .yen{font-size:24px;font-weight:800;color:var(--green-d);}
+  .wage-card .days{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px;}
+  .wage-card .detail{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;font-size:12.5px;color:var(--muted);display:none;}
+  .wage-card.open .detail{display:block;}
+  .wage-card .detail table{width:100%;border-collapse:collapse;}
+  .wage-card .detail td{padding:2px 0;}
+  .wage-card .detail td:last-child{text-align:right;color:var(--ink);font-weight:700;}
+
+  .set-block{padding:16px;margin-bottom:14px;}
+  .set-block h3{margin:0 0 12px;font-size:15px;font-weight:800;}
+  .field{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .field label{font-size:13.5px;font-weight:700;flex:0 0 140px;color:var(--ink);}
+  .field input[type=text],.field input[type=number]{flex:1;padding:11px 12px;border-radius:11px;border:1.5px solid var(--line);font-size:15px;background:var(--surface-2);}
+  .field input:focus{outline:none;border-color:var(--green);background:#fff;}
+  .toggle{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 0;}
+  .toggle .tl{font-size:14px;font-weight:700;}
+  .switch{width:52px;height:31px;border-radius:999px;background:var(--line);position:relative;flex:0 0 auto;transition:background .2s;border:none;}
+  .switch.on{background:var(--green);}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch.on::after{left:24px;}
+  .user-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .user-row input{flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);font-size:15px;background:var(--surface-2);}
+  .user-row .del{width:40px;height:40px;flex:0 0 auto;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--red);font-size:18px;font-weight:800;}
+  .add-user{margin-top:6px;}
+
+  .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom));}
+  .tabbar button{flex:1;background:none;border:none;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-weight:700;font-size:11px;}
+  .tabbar button .ic{font-size:22px;line-height:1;}
+  .tabbar button.active{color:var(--green);}
+
+  .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+    padding:12px 18px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:60;box-shadow:var(--shadow);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .banner{background:var(--green-bg);border:1px solid #CFE6DD;color:var(--green-d);border-radius:12px;padding:11px 14px;font-size:12.5px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+
+  /* ===== download modal ===== */
+  .dl-overlay{position:fixed;inset:0;background:rgba(43,42,39,.45);z-index:80;display:none;align-items:center;justify-content:center;padding:24px;}
+  .dl-overlay.show{display:flex;}
+  .dl-box{background:var(--surface);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.25);max-width:420px;width:100%;padding:22px;text-align:center;}
+  .dl-box h3{margin:0 0 8px;font-size:17px;font-weight:800;}
+  .dl-box p{margin:0 0 16px;font-size:13px;color:var(--muted);line-height:1.7;}
+  .dl-box a.dl-link{display:block;padding:16px;border-radius:13px;background:var(--green);color:#fff;font-weight:800;font-size:16px;text-decoration:none;box-shadow:var(--shadow);}
+  .dl-box .dl-note{margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.6;}
+  .dl-box .dl-close{margin-top:12px;background:none;border:none;color:var(--muted);font-weight:700;font-size:13px;padding:8px;}
+
+  /* ===== 初期設定オーバーレイ ===== */
+  .setup-overlay{position:fixed;inset:0;background:var(--bg);z-index:90;display:none;overflow:auto;padding:28px 20px;}
+  .setup-overlay.show{display:block;}
+  .setup-box{max-width:560px;margin:0 auto;}
+  .setup-box h2{font-size:24px;font-weight:800;margin:8px 0 6px;}
+  .setup-box .lead{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:20px;}
+  .setup-box .fld{margin-bottom:14px;}
+  .setup-box .fld label{display:block;font-size:13.5px;font-weight:800;margin-bottom:6px;}
+  .setup-box .fld input{width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--line);font-size:15px;background:var(--surface);}
+  .setup-box .fld input:focus{outline:none;border-color:var(--green);}
+  .setup-box .stat{min-height:24px;font-size:13.5px;font-weight:800;margin:10px 2px;}
+  .setup-box .btn{width:100%;padding:16px;font-size:16px;}
+
+  /* ===== Print layout: 2名 / A4横1枚 ===== */
+  #printRoot{display:none;}
+  @media print{
+    body>*{display:none !important;}
+    body{background:#fff;padding:0;}
+    #printRoot{display:block !important;font-family:"Hiragino Mincho ProN","MS PMincho","Hiragino Sans",serif;color:#000;}
+    .pr-page{page-break-after:always;display:flex;gap:8mm;padding:2mm 0;}
+    .pr-page:last-child{page-break-after:auto;}
+    .pr-block{flex:1;min-width:0;}
+    .pr-title{text-align:center;font-size:12pt;font-weight:600;margin-bottom:1.5mm;}
+    .pr-name{text-align:center;font-size:11pt;margin-bottom:1mm;}
+    .pr-ym{font-size:9pt;border-bottom:.4pt solid #000;display:inline-block;margin-bottom:1mm;}
+    .pr-body{display:flex;gap:3mm;align-items:stretch;}
+    table.pr-t{border-collapse:collapse;font-size:7.2pt;line-height:1.12;}
+    table.pr-t th,table.pr-t td{border:.4pt solid #000;padding:.25mm 1.4mm;text-align:center;}
+    table.pr-t td.yen{text-align:right;min-width:14mm;}
+    table.pr-t td.bik{min-width:10mm;}
+    table.pr-t tr.tot td{font-weight:700;}
+    .pr-com{flex:1;border:.4pt solid #000;display:flex;flex-direction:column;}
+    .pr-com .h{border-bottom:.4pt solid #000;text-align:center;font-size:8pt;padding:.6mm 0;}
+    .pr-com .b{flex:1;}
+  }
+  @page{size:A4 landscape;margin:9mm 8mm;}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-top">
+    <div class="brand">作業工賃記録<small>SAGYO WORK LOG</small></div>
+  </div>
+  <div class="facility-tabs" id="facTabs"></div>
+  <div class="datebar" id="dateBar">
+    <button class="navbtn" id="prevBtn">‹</button>
+    <div class="date-main">
+      <div class="d" id="dateD">—</div>
+      <div class="w" id="dateW">—</div>
+    </div>
+    <button class="navbtn" id="nextBtn">›</button>
+    <button class="today-btn" id="todayBtn">今日</button>
+  </div>
+</header>
+
+<main>
+  <!-- ENTRY -->
+  <section class="view active" id="view-entry">
+    <div class="seg type-seg" id="typeSegE">
+      <button data-k="wA" class="active">作業AM</button>
+      <button data-k="wP">作業PM</button>
+      <button data-k="m">給食</button>
+      <button data-k="b">入浴</button>
+    </div>
+    <div class="entry-status">
+      <b id="workedCount">0</b><span id="workedLabel">名が作業（午前）</span>
+      <span class="other" id="otherCount"></span>
+    </div>
+    <p class="hint" id="entryHint"></p>
+    <div class="name-grid" id="nameGrid"></div>
+    <div class="entry-spacer"></div>
+  </section>
+
+  <!-- MONTH -->
+  <section class="view" id="view-month">
+    <div class="seg type-seg" id="typeSegM">
+      <button data-t="w" class="active">作業</button>
+      <button data-t="m">給食</button>
+      <button data-t="b">入浴</button>
+    </div>
+    <div class="sec-head">
+      <div><h2 id="monthTitle">月間表</h2><div class="sub" id="monthSub"></div></div>
+      <div class="acts"><button class="btn ghost sm" id="exportBtn2">Excel出力</button></div>
+    </div>
+    <div class="grid-wrap"><div id="gridHolder"></div></div>
+  </section>
+
+  <!-- WAGE -->
+  <section class="view" id="view-wage">
+    <div class="sec-head">
+      <div><h2 id="wageTitle">工賃明細</h2><div class="sub" id="wageSub"></div></div>
+      <div class="acts">
+        <button class="btn ghost sm" id="printBtn">印刷 (2名/枚)</button>
+        <button class="btn sm" id="exportBtn3">Excel出力</button>
+      </div>
+    </div>
+    <div class="wage-list" id="wageList"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" id="view-settings">
+    <div class="banner">記録は自社のGoogleスプレッドシートに保存され、同じ接続設定を入れた端末（4事業所のiPad）で共有されます。同じ利用者が曜日によって別の事業所を利用する場合は、<b>同じ名前（同じ表記）</b>で各事業所に登録してください。<div id="connBadge" style="margin-top:6px;font-weight:800;"></div></div>
+
+    <div class="card set-block">
+      <h3>保存先の接続設定</h3>
+      <div class="field"><label>Apps Script URL</label><input type="text" id="gasUrlInput" placeholder="https://script.google.com/macros/s/…/exec"></div>
+      <div class="field"><label>アクセスキー</label><input type="text" id="gasKeyInput" placeholder="合言葉"></div>
+      <button class="btn ghost sm" id="connTestBtn">接続テストして保存</button>
+      <span id="connTestStat" style="margin-left:10px;font-size:13px;font-weight:800;"></span>
+    </div>
+
+    <div class="card set-block">
+      <h3>出力（Excelダウンロード）</h3>
+      <p class="hint" style="margin:0 0 12px">表示中の月の「月間表（合算）」「明細＆コメント（2名/A4横1枚）」「給食」「入浴」を1つのExcelにまとめて出力します。給食・入浴シートは日付が縦、名前が縦書きで横に並び、1日ごとにグレーの縞模様が入ります（モノクロ印刷用）。</p>
+      <button class="btn" id="exportBtn" style="width:100%">この月のExcelを出力</button>
+    </div>
+
+    <div class="card set-block">
+      <h3>工賃の設定</h3>
+      <div class="field"><label>1回のみ (円)</label><input type="number" id="rate1Input" min="0" step="10"></div>
+      <div class="field"><label>午前・午後 両方 (円)</label><input type="number" id="rate2Input" min="0" step="10"></div>
+      <p class="hint" style="margin:2px 0 0">午前または午後の片方だけ＝1回、両方＝2回として計算します。</p>
+    </div>
+
+    <div class="card set-block">
+      <h3>記録の設定</h3>
+      <div class="toggle">
+        <div class="tl">休み・欠席も記録する（作業）<div class="hint" style="margin:2px 0 0;font-weight:500">ONにすると作業カードの右上にバッジが出て、タップで 休み→欠席→なし を切り替えられます。</div></div>
+        <button class="switch" id="absSwitch"></button>
+      </div>
+    </div>
+
+    <div class="card set-block">
+      <h3>事業所の名前</h3>
+      <div id="facEdit"></div>
+    </div>
+
+    <div class="card set-block">
+      <h3>利用者リスト（作業・給食 共通）</h3>
+      <div class="sub" style="margin-bottom:10px;color:var(--muted);font-size:12.5px;font-weight:600" id="userEditFac"></div>
+      <div id="userEdit"></div>
+      <button class="btn ghost sm add-user" id="addUserBtn">＋ 利用者を追加</button>
+    </div>
+
+    <div class="card set-block">
+      <h3>入浴の対象者</h3>
+      <div class="sub" style="margin-bottom:10px;color:var(--muted);font-size:12.5px;font-weight:600" id="bathEditFac"></div>
+      <div id="bathEdit"></div>
+      <button class="btn ghost sm add-user" id="addBathBtn">＋ 対象者を追加</button>
+    </div>
+  </section>
+</main>
+
+<div class="save-bar" id="saveBar">
+  <div class="sl" id="saveLabel">午前の入力<small id="saveState">タップは即時反映されます</small></div>
+  <button class="btn" id="saveBtn">保存する</button>
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button data-v="entry" class="active"><span class="ic">✎</span>入力</button>
+  <button data-v="month"><span class="ic">▦</span>月間表</button>
+  <button data-v="wage"><span class="ic">¥</span>工賃明細</button>
+  <button data-v="settings"><span class="ic">⚙</span>設定</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<div class="dl-overlay" id="dlOverlay">
+  <div class="dl-box">
+    <h3>Excelができました</h3>
+    <p id="dlName">作業工賃.xlsx</p>
+    <a class="dl-link" id="dlLink" href="#" target="_blank" rel="noopener">開く / ダウンロード</a>
+    <div class="dl-note">タップしても開かない場合は、上のボタンを<b>長押し</b>して「リンク先をダウンロード」または「新規タブで開く」を選んでください。開いたプレビュー画面の共有ボタンから「ファイルに保存」できます。</div>
+    <button class="dl-close" id="dlClose">閉じる</button>
+  </div>
+</div>
+<div id="printRoot"></div>
+
+<div class="setup-overlay" id="setupOverlay">
+  <div class="setup-box">
+    <h2>はじめの設定（1回だけ）</h2>
+    <p class="lead">このiPadを記録の保存先（Googleスプレッドシート）につなぎます。セットアップ手順書で作成した「Apps ScriptのURL」と「アクセスキー」を入力してください。4台のiPadすべてに同じものを入力すると、記録が共有されます。</p>
+    <div class="fld"><label>Apps Script URL</label><input type="text" id="suUrl" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off"></div>
+    <div class="fld"><label>アクセスキー（合言葉）</label><input type="text" id="suKey" placeholder="手順書で決めた合言葉" autocapitalize="off" autocorrect="off"></div>
+    <div class="stat" id="suStat"></div>
+    <button class="btn" id="suBtn">接続して始める</button>
+  </div>
+</div>
+
+<script>
+/* ===== Storage: Googleスプレッドシート(Apps Script) + 端末内ミラー ===== */
+const conn={
+  url: localStorage.getItem('gasUrl')||'',
+  key: localStorage.getItem('gasKey')||''
+};
+let serverData=null;      // 起動時に全件取得したデータ {key:value}
+let online=false;
+function connSave(url,key){ conn.url=url.trim(); conn.key=key.trim();
+  localStorage.setItem('gasUrl',conn.url); localStorage.setItem('gasKey',conn.key); }
+function mirrorSet(k,v){ try{localStorage.setItem('mir_'+k,v);}catch(e){} }
+function mirrorGet(k){ try{return localStorage.getItem('mir_'+k);}catch(e){return null;} }
+
+async function gasFetch(body){
+  const res=await fetch(conn.url,{method:'POST',body:JSON.stringify(body)}); // text/plain → プリフライト回避
+  if(!res.ok) throw new Error('http '+res.status);
+  const j=await res.json();
+  if(!j.ok) throw new Error(j.error||'gas error');
+  return j;
+}
+async function loadAll(){
+  if(!conn.url) throw new Error('未設定');
+  const j=await gasFetch({action:'getall',accessKey:conn.key});
+  serverData=j.data||{};
+  Object.entries(serverData).forEach(([k,v])=>mirrorSet(k,v));
+  online=true; setConnBadge();
+  return serverData;
+}
+const store={
+  async get(k){
+    if(serverData&&(k in serverData)) return serverData[k];
+    return mirrorGet(k);
+  },
+  async set(k,v){
+    if(serverData) serverData[k]=v;
+    mirrorSet(k,v);
+    await gasFetch({action:'set',key:k,value:v,accessKey:conn.key});
+    online=true; setConnBadge();
+  }
+};
+function setConnBadge(){
+  const el=document.getElementById('connBadge'); if(!el) return;
+  el.textContent=online?'● 接続中':'● オフライン（端末内に保存中）';
+  el.style.color=online?'#2E7D6B':'#C1544E';
+}
+
+/* ===== Defaults ===== */
+const DEFAULT_CONFIG={
+  facilities:[
+    {id:'f1',name:'生活介護かわつ'},
+    {id:'f2',name:'事業所2'},
+    {id:'f3',name:'事業所3'},
+    {id:'f4',name:'事業所4'}
+  ],
+  users:{
+    f1:['岩垣久美子','早川樹生','猪原瑠歌','石田真央','梶谷光','赤山拓実','田原康大','黒田祐樹','青木美歌','野津彩音','松本渓志','成相光基','井上智史','梶谷葵子','増野翔太','錦織里早','山崎達也','森口彩音','青山聖','ジャンスウェ','藤井暉至','錦織秀二','小林健一'],
+    f2:[],f3:[],f4:[]
+  },
+  bathUsers:{ f1:['赤山拓実'], f2:[],f3:[],f4:[] },
+  rate1:200, rate2:250, useAbsence:false
+};
+const WDAY=['日','月','火','水','木','金','土'];
+const ALL='__all';
+/* 記録タイプ: w=作業, m=給食, b=入浴 */
+const TYPE_INFO={
+  w:{label:'作業', storePrefix:'rec_'},
+  m:{label:'給食', storePrefix:'recM_'},
+  b:{label:'入浴', storePrefix:'recB_'}
+};
+
+/* ===== State ===== */
+let config=null, curFac='f1', scopeFac=ALL, curView='entry', activeSess='A', recType='w';
+let lastBlobUrl=null;
+let today=new Date();
+let cur={y:today.getFullYear(),m:today.getMonth()+1,d:today.getDate()};
+const recCache={};
+
+const pad=n=>String(n).padStart(2,'0');
+const ymKey=()=>`${cur.y}-${pad(cur.m)}`;
+const storeKey=(t,fid,ym)=>`${TYPE_INFO[t].storePrefix}${fid}_${ym}`;
+const cacheKey=(t,fid,ym)=>`${t}_${fid}_${ym}`;
+const daysInMonth=(y,m)=>new Date(y,m,0).getDate();
+const dowOf=(y,m,d)=>new Date(y,m-1,d).getDay();
+
+/* ===== value helpers (作業) ===== */
+function norm(v){ if(v==='1')return 'A'; if(['A','P','AP','休','欠'].includes(v))return v; return ''; }
+const cnt=v=>v==='AP'?2:(v==='A'||v==='P')?1:0;
+const hasAM=v=>v==='A'||v==='AP';
+const hasPM=v=>v==='P'||v==='AP';
+function wageOf(v){ const c=cnt(v); return c===2?config.rate2:c===1?config.rate1:0; }
+function toggleSession(v,s){
+  let base=(v==='休'||v==='欠')?'':v;
+  let a=hasAM(base), p=hasPM(base);
+  if(s==='A')a=!a; else p=!p;
+  return a&&p?'AP':a?'A':p?'P':'';
+}
+
+/* ===== load/save ===== */
+async function loadConfig(){
+  const raw=await store.get('config');
+  if(raw){ try{ config=JSON.parse(raw); }catch(e){ config=null; } }
+  if(!config){ config=JSON.parse(JSON.stringify(DEFAULT_CONFIG)); await saveConfig(); }
+  if(config.rate1==null) config.rate1=config.rate??200;
+  if(config.rate2==null) config.rate2=250;
+  config.useAbsence=!!config.useAbsence;
+  config.users=config.users||{};
+  config.bathUsers=config.bathUsers||{};
+  config.facilities.forEach(f=>{
+    if(!config.users[f.id]) config.users[f.id]=[];
+    if(!config.bathUsers[f.id]) config.bathUsers[f.id]=(f.id==='f1'?['赤山拓実']:[]);
+  });
+}
+async function saveConfig(){ await store.set('config',JSON.stringify(config)); }
+async function ensureRec(t,fid,ym){
+  const k=cacheKey(t,fid,ym);
+  if(recCache[k]) return recCache[k];
+  const raw=await store.get(storeKey(t,fid,ym));
+  let o={}; if(raw){ try{ o=JSON.parse(raw); }catch(e){ o={}; } }
+  recCache[k]=o; return o;
+}
+async function ensureAll(t,ym){ for(const f of config.facilities) await ensureRec(t,f.id,ym); }
+function getState(t,fid,ym,day,user){
+  const o=recCache[cacheKey(t,fid,ym)];
+  const raw=(o&&o[day]&&o[day][user])||'';
+  return t==='w'?norm(raw):(raw?'○':'');
+}
+function setStateVal(t,fid,ym,day,user,val){
+  const k=cacheKey(t,fid,ym); if(!recCache[k])recCache[k]={};
+  if(!recCache[k][day])recCache[k][day]={};
+  if(val)recCache[k][day][user]=val; else delete recCache[k][day][user];
+}
+
+/* ===== merged (合算) ===== */
+function unionUsers(map){
+  const seen=new Set(),out=[];
+  config.facilities.forEach(f=>(map[f.id]||[]).forEach(u=>{
+    const n=(u||'').trim(); if(n&&!seen.has(n)){seen.add(n);out.push(n);}
+  }));
+  return out;
+}
+function mergedUsers(){ return unionUsers(config.users); }
+function mergedBathUsers(){ return unionUsers(config.bathUsers); }
+function getMergedState(ym,day,user){
+  let a=false,p=false,rest=false,abs=false;
+  for(const f of config.facilities){
+    const v=getState('w',f.id,ym,day,user);
+    if(hasAM(v))a=true; if(hasPM(v))p=true;
+    if(v==='休')rest=true; if(v==='欠')abs=true;
+  }
+  if(a&&p)return 'AP'; if(a)return 'A'; if(p)return 'P';
+  if(rest)return '休'; if(abs)return '欠'; return '';
+}
+function getMergedMark(t,ym,day,user){
+  for(const f of config.facilities){ if(getState(t,f.id,ym,day,user)==='○') return '○'; }
+  return '';
+}
+function typeUserMap(t){ return t==='b'?config.bathUsers:config.users; }
+function scopedUsers(t){
+  const map=typeUserMap(t);
+  return scopeFac===ALL?unionUsers(map):(map[scopeFac]||[]).map(s=>s.trim()).filter(Boolean);
+}
+function scopedState(t,ym,day,user){
+  if(t==='w') return scopeFac===ALL?getMergedState(ym,day,user):getState('w',scopeFac,ym,day,user);
+  return scopeFac===ALL?getMergedMark(t,ym,day,user):getState(t,scopeFac,ym,day,user);
+}
+
+/* ===== debounced save ===== */
+const dirty=new Set(); let saveTimer=null;
+function scheduleSave(t,fid,ym){
+  dirty.add(cacheKey(t,fid,ym));
+  setSaveState('未保存の変更あり（自動保存されます）');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(flushSaves,700);
+}
+async function flushSaves(){
+  clearTimeout(saveTimer); saveTimer=null;
+  const keys=[...dirty]; dirty.clear();
+  for(const k of keys){
+    const [t,rest]=[k.slice(0,1),k.slice(2)];
+    const i=rest.lastIndexOf('_'); const fid=rest.slice(0,i), ym=rest.slice(i+1);
+    try{ await store.set(storeKey(t,fid,ym),JSON.stringify(recCache[k]||{})); }
+    catch(e){ dirty.add(k); online=false; setConnBadge(); }
+  }
+  if(dirty.size===0) setSaveState('保存済み ✓');
+  else{ setSaveState('通信エラー：端末内に保持しています（自動で再送します）'); clearTimeout(saveTimer); saveTimer=setTimeout(flushSaves,8000); }
+}
+function setSaveState(t){ const el=document.getElementById('saveState'); if(el)el.textContent=t; }
+window.addEventListener('visibilitychange',()=>{ if(document.hidden) flushSaves(); });
+window.addEventListener('pagehide',()=>flushSaves());
+
+/* ===== toast ===== */
+let tT; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),1600); }
+
+/* ===== header ===== */
+function renderFacTabs(){
+  const el=document.getElementById('facTabs'); el.innerHTML='';
+  const withAll=(curView==='month'||curView==='wage');
+  if(withAll){
+    const b=document.createElement('button');
+    b.className='fac-tab all'+(scopeFac===ALL?' active':'');
+    b.textContent='全体（合算）';
+    b.onclick=async()=>{ scopeFac=ALL; renderFacTabs(); await renderView(); };
+    el.appendChild(b);
+  }
+  config.facilities.forEach(f=>{
+    const b=document.createElement('button');
+    const active=withAll?(scopeFac===f.id):(curFac===f.id);
+    b.className='fac-tab'+(active?' active':'');
+    b.textContent=f.name;
+    b.onclick=async()=>{
+      if(withAll){ scopeFac=f.id; } else { await flushSaves(); curFac=f.id; }
+      renderFacTabs(); await renderView();
+    };
+    el.appendChild(b);
+  });
+}
+function renderDateBar(){
+  const w=dowOf(cur.y,cur.m,cur.d);
+  const showDay=(curView==='entry');
+  document.getElementById('dateD').textContent=showDay?`${cur.m}月${cur.d}日`:`${cur.y}年${cur.m}月`;
+  const we=document.getElementById('dateW');
+  we.textContent=showDay?`${cur.y}年 (${WDAY[w]})`:'月を選択';
+  we.className='w'+(showDay&&w===0?' sun':showDay&&w===6?' sat':'');
+  document.getElementById('todayBtn').style.display=showDay?'':'none';
+}
+function shiftDate(dir){
+  if(curView==='entry'){
+    const dt=new Date(cur.y,cur.m-1,cur.d); dt.setDate(dt.getDate()+dir);
+    cur={y:dt.getFullYear(),m:dt.getMonth()+1,d:dt.getDate()};
+  }else{
+    let m=cur.m+dir,y=cur.y; if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+    cur={y,m,d:Math.min(cur.d,daysInMonth(y,m))};
+  }
+}
+function syncTypeSegs(){
+  const key=recType==='w'?(activeSess==='A'?'wA':'wP'):recType;
+  document.querySelectorAll('#typeSegE button').forEach(b=>b.classList.toggle('active',b.dataset.k===key));
+  document.querySelectorAll('#typeSegM button').forEach(b=>b.classList.toggle('active',b.dataset.t===recType));
+}
+
+/* ===== ENTRY ===== */
+function cardHTML(u,v){
+  if(recType!=='w'){
+    return `<span class="nm">${u}</span><span class="mark">${v==='○'?'○':'—'}</span>`;
+  }
+  const wg=cnt(v)?('¥'+wageOf(v)+'（'+cnt(v)+'回）'):'';
+  const pills=(v==='休'||v==='欠')?'':
+    `<span class="sess"><span class="pill ${hasAM(v)?'on':''}">午前</span><span class="pill ${hasPM(v)?'on':''}">午後</span></span>`;
+  const badge=config.useAbsence?`<span class="abs-badge">${v==='休'?'休み':v==='欠'?'欠席':'休/欠'}</span>`:'';
+  return `${badge}<span class="nm">${u}</span>${pills}<span class="wg">${wg}</span>`;
+}
+function cardClass(v){
+  if(recType!=='w') return 'name-btn'+(v==='○'?' active-on':'');
+  const activeOn=activeSess==='A'?hasAM(v):hasPM(v);
+  return 'name-btn'+(v==='休'?' rest':v==='欠'?' absent':activeOn?' active-on':'');
+}
+function entryUsers(){
+  return recType==='b'?(config.bathUsers[curFac]||[]):(config.users[curFac]||[]);
+}
+function updateCounts(){
+  const ym=ymKey();
+  if(recType!=='w'){
+    let n=0; entryUsers().forEach(u=>{ if(getState(recType,curFac,ym,cur.d,u)==='○')n++; });
+    document.getElementById('workedCount').textContent=String(n);
+    document.getElementById('workedLabel').textContent=recType==='m'?'名が給食':'名が入浴';
+    document.getElementById('otherCount').textContent='';
+    return;
+  }
+  const users=config.users[curFac]||[]; let am=0,pm=0;
+  users.forEach(u=>{ const v=getState('w',curFac,ym,cur.d,u); if(hasAM(v))am++; if(hasPM(v))pm++; });
+  document.getElementById('workedCount').textContent=String(activeSess==='A'?am:pm);
+  document.getElementById('workedLabel').textContent=`名が作業（${activeSess==='A'?'午前':'午後'}）`;
+  document.getElementById('otherCount').textContent=activeSess==='A'?`／ 午後 ${pm}名`:`／ 午前 ${am}名`;
+}
+function refreshCard(btn,u){
+  const v=getState(recType,curFac,ymKey(),cur.d,u);
+  btn.className=cardClass(v);
+  btn.innerHTML=cardHTML(u,v);
+  attachBadge(btn,u);
+}
+function attachBadge(btn,u){
+  if(recType!=='w'||!config.useAbsence) return;
+  const bd=btn.querySelector('.abs-badge'); if(!bd) return;
+  bd.onclick=(e)=>{
+    e.stopPropagation();
+    const v=getState('w',curFac,ymKey(),cur.d,u);
+    const nv=v==='休'?'欠':v==='欠'?'':'休';
+    setStateVal('w',curFac,ymKey(),cur.d,u,nv);
+    scheduleSave('w',curFac,ymKey());
+    refreshCard(btn,u); updateCounts();
+  };
+}
+async function renderEntry(){
+  await ensureRec(recType,curFac,ymKey());
+  syncTypeSegs();
+  const users=entryUsers();
+  const tn=TYPE_INFO[recType].label;
+  const sessName=activeSess==='A'?'午前':'午後';
+  document.getElementById('entryHint').textContent=
+    recType==='w'
+    ? `「${sessName}」に作業した人をタップします。午前と午後の両方で2回（¥${config.rate2}）、片方だけなら1回（¥${config.rate1}）。タップは即時反映され、自動保存されます。`
+    : `${tn}の記録です。${recType==='m'?'食べた':'入浴した'}人をタップすると ○ が付き、もう一度タップで消えます。自動保存されます。`;
+  document.getElementById('saveLabel').innerHTML=
+    (recType==='w'?`作業${activeSess==='A'?'AM':'PM'}の入力`:`${tn}の入力`)+`<small id="saveState">タップは即時反映されます</small>`;
+
+  const grid=document.getElementById('nameGrid');
+  if(users.length===0){
+    grid.innerHTML=`<div class="empty-note">${recType==='b'?'この事業所には入浴の対象者が登録されていません。<br>「設定 ⚙」→「入浴の対象者」から追加してください。':'この事業所には利用者が登録されていません。<br>「設定 ⚙」→「利用者リスト」から追加してください。'}</div>`;
+    document.getElementById('workedCount').textContent='0';
+    document.getElementById('otherCount').textContent=''; updateCounts(); return;
+  }
+  grid.innerHTML='';
+  users.forEach(u=>{
+    const v=getState(recType,curFac,ymKey(),cur.d,u);
+    const b=document.createElement('button');
+    b.className=cardClass(v);
+    b.innerHTML=cardHTML(u,v);
+    b.onclick=()=>{
+      const t=recType;
+      const cv=getState(t,curFac,ymKey(),cur.d,u);
+      const nv=t==='w'?toggleSession(cv,activeSess):(cv==='○'?'':'○');
+      setStateVal(t,curFac,ymKey(),cur.d,u,nv);
+      scheduleSave(t,curFac,ymKey());
+      refreshCard(b,u); updateCounts();
+    };
+    attachBadge(b,u);
+    grid.appendChild(b);
+  });
+  updateCounts();
+}
+
+/* ===== MONTH GRID ===== */
+async function renderMonth(){
+  const ym=ymKey(); await ensureAll(recType,ym);
+  syncTypeSegs();
+  const users=scopedUsers(recType);
+  const dim=daysInMonth(cur.y,cur.m);
+  const tn=TYPE_INFO[recType].label;
+  const scopeName=scopeFac===ALL?'全体（合算）':config.facilities.find(f=>f.id===scopeFac).name;
+  document.getElementById('monthTitle').textContent=`${tn} 月間表 — ${scopeName}`;
+  document.getElementById('monthSub').textContent=recType==='w'
+    ? `${cur.y}年${cur.m}月 ・ セル数字＝回数（1 or 2）`
+    : `${cur.y}年${cur.m}月 ・ ○＝${recType==='m'?'給食あり':'入浴あり'}`;
+  const holder=document.getElementById('gridHolder');
+  if(users.length===0){ holder.innerHTML='<div class="empty-note">対象者が未登録です。</div>'; return; }
+
+  const totals={}; users.forEach(u=>totals[u]=0);
+  const striped=recType!=='w';
+  let html=`<table class="grid${striped?' striped':''}"><thead><tr><th class="day">日</th><th class="dow">曜</th>`;
+  users.forEach(u=>html+=`<th class="colname">${u}</th>`);
+  html+='<th class="total">合計</th></tr></thead><tbody>';
+  for(let d=1;d<=dim;d++){
+    const w=dowOf(cur.y,cur.m,d);
+    const zeb=striped&&d%2===0?' zeb':'';
+    html+=`<tr class="${w===0?'sun':w===6?'sat':''}${zeb}"><td class="day">${d}</td><td class="dow">${WDAY[w]}</td>`;
+    let dt=0;
+    users.forEach(u=>{
+      const v=scopedState(recType,ym,d,u);
+      if(recType==='w'){
+        const c=cnt(v);
+        let cc='cell',tx='';
+        if(c===2){cc+=' v-2';tx='2';} else if(c===1){cc+=' v-1';tx='1';}
+        else if(v==='休'){cc+=' v-rest';tx='休';} else if(v==='欠'){cc+=' v-absent';tx='欠';}
+        html+=`<td class="${cc}">${tx}</td>`;
+        totals[u]+=c; dt+=c;
+      }else{
+        const on=v==='○';
+        html+=`<td class="cell">${on?'○':''}</td>`;
+        if(on){totals[u]++;dt++;}
+      }
+    });
+    html+=`<td class="total">${dt||''}</td></tr>`;
+  }
+  html+='<tr class="totrow"><td class="day"></td><td class="dow">計</td>';
+  let grand=0; users.forEach(u=>{html+=`<td class="total">${totals[u]}</td>`;grand+=totals[u];});
+  html+=`<td class="total">${grand}</td></tr></tbody></table>`;
+  holder.innerHTML=html;
+}
+
+/* ===== WAGE ===== */
+async function renderWage(){
+  const ym=ymKey(); await ensureAll('w',ym);
+  const users=scopedUsers('w');
+  const dim=daysInMonth(cur.y,cur.m);
+  const scopeName=scopeFac===ALL?'全体（合算）':config.facilities.find(f=>f.id===scopeFac).name;
+  document.getElementById('wageTitle').textContent=`工賃明細 — ${scopeName}`;
+  document.getElementById('wageSub').textContent=`${cur.y}年${cur.m}月 ・ 1回¥${config.rate1} / 2回¥${config.rate2}`;
+  const list=document.getElementById('wageList');
+  if(users.length===0){ list.innerHTML='<div class="empty-note">利用者が未登録です。</div>'; return; }
+  list.innerHTML='';
+  users.forEach(u=>{
+    let total=0,days=0,ses=0,rows='';
+    for(let d=1;d<=dim;d++){
+      const v=scopedState('w',ym,d,u); const c=cnt(v); const wage=wageOf(v);
+      if(c>0){days++;ses+=c;total+=wage;}
+      const w=dowOf(cur.y,cur.m,d);
+      const note=v==='休'?'休':v==='欠'?'欠':'';
+      rows+=`<tr><td>${d}日(${WDAY[w]})</td><td>${wage?('¥'+wage+' ('+c+'回)'):(note||'—')}</td></tr>`;
+    }
+    const c=document.createElement('div'); c.className='wage-card';
+    c.innerHTML=`<div class="wn">${u} 様</div>
+      <div class="wr"><span class="lab">支給合計</span><span class="yen">¥${total.toLocaleString()}</span></div>
+      <div class="days">作業 ${days}日 ・ 計 ${ses}回</div>
+      <div class="detail"><table>${rows}</table></div>`;
+    c.onclick=()=>c.classList.toggle('open');
+    list.appendChild(c);
+  });
+}
+
+/* ===== SETTINGS ===== */
+function userListEditor(holderId,list,onChange){
+  const ue=document.getElementById(holderId); ue.innerHTML='';
+  list.forEach((u,i)=>{
+    const row=document.createElement('div'); row.className='user-row';
+    const inp=document.createElement('input'); inp.type='text'; inp.value=u;
+    inp.onchange=async()=>{ list[i]=inp.value.trim(); await saveConfig(); toast('保存しました'); if(onChange)onChange(); };
+    const del=document.createElement('button'); del.className='del'; del.textContent='×';
+    del.onclick=async()=>{ list.splice(i,1); await saveConfig(); renderSettings(); };
+    row.appendChild(inp); row.appendChild(del); ue.appendChild(row);
+  });
+}
+function renderSettings(){
+  document.getElementById('gasUrlInput').value=conn.url;
+  document.getElementById('gasKeyInput').value=conn.key;
+  setConnBadge();
+  document.getElementById('rate1Input').value=config.rate1;
+  document.getElementById('rate2Input').value=config.rate2;
+  document.getElementById('absSwitch').className='switch'+(config.useAbsence?' on':'');
+  const fe=document.getElementById('facEdit'); fe.innerHTML='';
+  config.facilities.forEach(f=>{
+    const row=document.createElement('div'); row.className='field';
+    row.innerHTML=`<label>${f.id.toUpperCase()}</label>`;
+    const inp=document.createElement('input'); inp.type='text'; inp.value=f.name;
+    inp.onchange=async()=>{ f.name=inp.value.trim()||f.name; await saveConfig(); renderFacTabs(); toast('保存しました'); };
+    row.appendChild(inp); fe.appendChild(row);
+  });
+  const fac=config.facilities.find(f=>f.id===curFac);
+  document.getElementById('userEditFac').textContent=`編集中の事業所：${fac.name}（上のタブで切り替え）`;
+  document.getElementById('bathEditFac').textContent=`編集中の事業所：${fac.name}`;
+  userListEditor('userEdit',config.users[curFac]);
+  userListEditor('bathEdit',config.bathUsers[curFac]);
+}
+
+/* ===== EXCEL EXPORT ===== */
+function colL(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26);} return s; }
+
+/* 給食・入浴シート: 日付=縦, 名前=縦書き横並び, 1日ごとグレー縞（モノクロ印刷用） */
+function buildMarkSheet(wb,title,users,getMark,ctx){
+  const {F,thin,box,ctr,dim}=ctx;
+  const GRAY={type:'pattern',pattern:'solid',fgColor:{argb:'FFE0E0E0'}};
+  const ws=wb.addWorksheet(title,{views:[{state:'frozen',xSplit:2,ySplit:2}]});
+  ws.getCell('A1').value=`${title}記録`;
+  ws.getCell('A1').font={name:F,size:12,bold:true};
+  ws.getCell('C1').value=`${cur.y}年${cur.m}月`;
+  ws.getCell('C1').font={name:F,size:11};
+  // 見出し行: 日付 / 曜日 / 名前(縦書き) / 計
+  ws.getCell(2,1).value='日付'; ws.getCell(2,2).value='曜日';
+  users.forEach((u,i)=>{
+    const c=ws.getCell(2,3+i); c.value=u;
+    c.alignment={textRotation:'vertical',horizontal:'center',vertical:'middle'};
+  });
+  ws.getCell(2,3+users.length).value='計';
+  ws.getRow(2).height=95;
+  // 日別行（1日ごとに縞）
+  for(let d=1;d<=dim;d++){
+    const r=2+d, w=dowOf(cur.y,cur.m,d);
+    ws.getCell(r,1).value=d; ws.getCell(r,2).value=WDAY[w];
+    let dt=0;
+    users.forEach((u,i)=>{ const mk=getMark(d,u); if(mk){ws.getCell(r,3+i).value='○';dt++;} });
+    if(dt) ws.getCell(r,3+users.length).value=dt;
+    if(d%2===0){ for(let c=1;c<=3+users.length;c++) ws.getCell(r,c).fill=GRAY; }
+  }
+  // 計行
+  const totR=3+dim;
+  ws.getCell(totR,2).value='計';
+  users.forEach((u,i)=>{ const L=colL(3+i);
+    let n=0; for(let d=1;d<=dim;d++){ if(getMark(d,u))n++; }
+    ws.getCell(totR,3+i).value={formula:`COUNTIF(${L}3:${L}${2+dim},"○")`,result:n};
+  });
+  // 罫線・フォント・整列
+  for(let r=2;r<=totR;r++) for(let c=1;c<=3+users.length;c++){
+    const cell=ws.getCell(r,c); cell.border=box;
+    cell.font={name:F,size:10};
+    if(r>2||c<3) cell.alignment=cell.alignment&&cell.alignment.textRotation?cell.alignment:ctr;
+    if(r===2&&c>=3&&c<3+users.length) cell.alignment={textRotation:'vertical',horizontal:'center',vertical:'middle'};
+  }
+  ws.getColumn(1).width=5; ws.getColumn(2).width=5;
+  users.forEach((u,i)=>ws.getColumn(3+i).width=4.2);
+  ws.getColumn(3+users.length).width=5;
+  ws.pageSetup={orientation:'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,
+    margins:{left:0.4,right:0.4,top:0.6,bottom:0.6,header:0.3,footer:0.3}};
+  return ws;
+}
+
+async function exportExcel(){
+  if(typeof ExcelJS==='undefined'){ toast('出力ライブラリを読込中です。少し待って再度お試しください'); return; }
+  toast('Excelを作成中…');
+  await flushSaves();
+  const ym=ymKey();
+  await ensureAll('w',ym); await ensureAll('m',ym); await ensureAll('b',ym);
+  const dim=daysInMonth(cur.y,cur.m);
+  const users=mergedUsers();
+  if(users.length===0){ toast('利用者が登録されていません'); return; }
+  const R1=config.rate1, R2=config.rate2;
+  const F='ＭＳ Ｐゴシック';
+  const thin={style:'thin'};
+  const box={top:thin,bottom:thin,left:thin,right:thin};
+  const ctr={horizontal:'center',vertical:'middle'};
+  const YEN='"¥"#,##0;[Red]"¥"\\-#,##0';
+  const msn=`${cur.m}月`;
+  const ctx={F,thin,box,ctr,dim};
+
+  const wb=new ExcelJS.Workbook();
+
+  /* ---- Sheet1: 月間表（合算）— 明細の参照元 ---- */
+  const ws=wb.addWorksheet(msn,{views:[{state:'frozen',xSplit:3,ySplit:2}]});
+  const val={};
+  users.forEach(u=>{ val[u]={}; for(let d=1;d<=dim;d++){ const v=getMergedState(ym,d,u); val[u][d]=cnt(v)||(v==='休'?'休':v==='欠'?'欠':''); } });
+  ws.getCell('A1').value='作業記録（合算）';
+  ws.getCell('I1').value=`${cur.y}年${cur.m}月`;
+  ws.getCell('A2').value='日付'; ws.getCell('B2').value='曜日'; ws.getCell('C2').value='営業日';
+  users.forEach((u,i)=>{ const c=ws.getCell(2,4+i); c.value=u; c.alignment={...ctr,wrapText:true}; });
+  for(let d=1;d<=dim;d++){
+    const r=2+d, w=dowOf(cur.y,cur.m,d);
+    ws.getCell(r,1).value=d; ws.getCell(r,2).value=WDAY[w];
+    users.forEach((u,i)=>{ const v=val[u][d]; if(v!==''&&v!==0) ws.getCell(r,4+i).value=v; });
+  }
+  const totR=3+dim;
+  ws.getCell(totR,2).value='計';
+  users.forEach((u,i)=>{ const L=colL(4+i);
+    ws.getCell(totR,4+i).value={formula:`SUM(${L}3:${L}${2+dim})`,result:Object.values(val[u]).reduce((a,b)=>a+(typeof b==='number'?b:0),0)};
+  });
+  for(let r=2;r<=totR;r++) for(let c=1;c<=3+users.length;c++){
+    const cell=ws.getCell(r,c); cell.border=box; cell.alignment=ctr; cell.font={name:F,size:10};
+  }
+  ws.getColumn(1).width=5; ws.getColumn(2).width=5; ws.getColumn(3).width=6;
+  users.forEach((u,i)=>ws.getColumn(4+i).width=4.5);
+  ws.getRow(2).height=60;
+
+  /* ---- Sheet2: 明細＆コメント（テンプレート完全再現） ---- */
+  const wd=wb.addWorksheet('明細＆コメント');
+  const widths={1:3.5,2:10.75,3:5,4:14.5,5:8.09,6:3,7:27.875,8:4.75,9:10.75,10:5,11:14.5,12:8.09,13:3,14:27.875};
+  Object.entries(widths).forEach(([c,w])=>wd.getColumn(+c).width=w);
+  const pitch=dim+7;
+  const sides=[{c0:2},{c0:9}];
+  for(let bi=0;bi*2<users.length;bi++){
+    const r0=bi*pitch+1;
+    for(let s=0;s<2;s++){
+      const uIdx=bi*2+s;
+      const {c0}=sides[s];
+      const cEnd=c0+3, comC=c0+5;
+      const mCol=colL(4+uIdx);
+      wd.mergeCells(r0,c0,r0,cEnd);
+      const t=wd.getCell(r0,c0); t.value='作業工賃支給明細'; t.alignment=ctr; t.font={name:F,size:11};
+      if(uIdx>=users.length) continue;
+      const nm=wd.getCell(r0+1,c0); nm.value={formula:`'${msn}'!${mCol}2`,result:users[uIdx]}; nm.alignment=ctr; nm.font={name:F,size:11};
+      const sm=wd.getCell(r0+1,c0+1); sm.value='様'; sm.alignment=ctr; sm.font={name:F,size:11};
+      const yb=wd.getCell(r0+2,c0); yb.value={formula:`'${msn}'!I1`,result:`${cur.y}年${cur.m}月`};
+      yb.font={name:F,size:11}; yb.border={bottom:thin};
+      ['日付','曜日','工賃','備考'].forEach((h,i)=>{
+        const c=wd.getCell(r0+3,c0+i); c.value=h; c.alignment=ctr; c.font={name:F,size:11}; c.border=box;
+      });
+      const ch=wd.getCell(r0+3,comC); ch.value='担当者よりコメント'; ch.alignment=ctr; ch.font={name:F,size:11}; ch.border=box;
+      wd.getRow(r0+3).height=21;
+      let totalWage=0;
+      for(let d=1;d<=dim;d++){
+        const r=r0+3+d, w=dowOf(cur.y,cur.m,d);
+        const v=getMergedState(ym,d,users[uIdx]); const wage=wageOf(v); totalWage+=wage;
+        const dc=wd.getCell(r,c0); dc.value={formula:`'${msn}'!A${2+d}`,result:d};
+        const wc=wd.getCell(r,c0+1); wc.value={formula:`'${msn}'!B${2+d}`,result:WDAY[w]};
+        const yc=wd.getCell(r,c0+2);
+        yc.value={formula:`IF('${msn}'!${mCol}${2+d}=1,${R1},IF('${msn}'!${mCol}${2+d}=2,${R2},0))`,result:wage};
+        const bc=wd.getCell(r,c0+3); if(v==='休'||v==='欠') bc.value=v;
+        [dc,wc,yc,bc].forEach(x=>{x.border=box;x.font={name:F,size:x===bc?9:11};x.alignment=ctr;});
+        yc.alignment={vertical:'middle'};
+      }
+      wd.mergeCells(r0+4,comC,r0+3+dim+1,comC);
+      wd.getCell(r0+4,comC).border=box;
+      const rT=r0+4+dim;
+      wd.mergeCells(rT,c0,rT,c0+1);
+      const tl=wd.getCell(rT,c0); tl.value='支給合計'; tl.alignment=ctr; tl.font={name:F,size:11}; tl.border=box;
+      const tv=wd.getCell(rT,c0+2);
+      const cw=colL(c0+2);
+      tv.value={formula:`SUM(${cw}${r0+4}:${cw}${r0+3+dim})`,result:totalWage};
+      tv.numFmt=YEN; tv.font={name:F,size:11}; tv.border=box; tv.alignment={vertical:'middle'};
+      wd.getCell(rT,c0+3).border=box;
+      wd.getRow(rT).height=21;
+    }
+    wd.getRow(bi*pitch+pitch).addPageBreak();
+  }
+  const lastRow=Math.ceil(users.length/2)*pitch;
+  wd.pageSetup={orientation:'landscape',paperSize:9,scale:96,
+    margins:{left:0.2,right:0.04,top:0.75,bottom:0.75,header:0.31,footer:0.31},
+    printArea:`A1:N${lastRow+2}`};
+
+  /* ---- Sheet3: 給食（縞模様） ---- */
+  buildMarkSheet(wb,'給食',users,(d,u)=>getMergedMark('m',ym,d,u),ctx);
+
+  /* ---- Sheet4: 入浴（縞模様） ---- */
+  const bathU=mergedBathUsers();
+  if(bathU.length>0) buildMarkSheet(wb,'入浴',bathU,(d,u)=>getMergedMark('b',ym,d,u),ctx);
+
+  /* ---- Sheet5: 全体集計 ---- */
+  const s3=wb.addWorksheet('全体集計');
+  s3.addRow(['利用者','作業日数','回数計','工賃合計(円)','給食(日)','入浴(日)']);
+  users.forEach(u=>{
+    let days=0,ses=0,t=0,ml=0,bt=0;
+    for(let d=1;d<=dim;d++){
+      const v=getMergedState(ym,d,u); const c=cnt(v); if(c>0){days++;ses+=c;t+=wageOf(v);}
+      if(getMergedMark('m',ym,d,u))ml++;
+      if(getMergedMark('b',ym,d,u))bt++;
+    }
+    s3.addRow([u,days,ses,t,ml,bt]);
+  });
+  s3.columns=[{width:16},{width:10},{width:8},{width:14},{width:9},{width:9}];
+  s3.eachRow((r,ri)=>r.eachCell(c=>{c.font={name:F,size:11,bold:ri===1};}));
+
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const fname=`作業工賃_${cur.y}年${pad(cur.m)}月.xlsx`;
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  toast('ダウンロードしました');
+}
+
+/* ===== PRINT (2名 / A4横1枚) ===== */
+async function printStatements(){
+  await flushSaves();
+  const ym=ymKey(); await ensureAll('w',ym);
+  const dim=daysInMonth(cur.y,cur.m);
+  const users=scopedUsers('w');
+  if(users.length===0){ toast('利用者が登録されていません'); return; }
+  const root=document.getElementById('printRoot'); root.innerHTML='';
+  for(let i=0;i<users.length;i+=2){
+    const page=document.createElement('div'); page.className='pr-page';
+    users.slice(i,i+2).forEach(u=>{
+      let rows='',total=0;
+      for(let d=1;d<=dim;d++){
+        const v=scopedState('w',ym,d,u); const wage=wageOf(v); total+=wage;
+        const note=v==='休'?'休':v==='欠'?'欠':'';
+        rows+=`<tr><td>${d}</td><td>${WDAY[dowOf(cur.y,cur.m,d)]}</td><td class="yen">${wage||0}</td><td class="bik">${note}</td></tr>`;
+      }
+      page.insertAdjacentHTML('beforeend',
+        `<div class="pr-block">
+          <div class="pr-title">作業工賃支給明細</div>
+          <div class="pr-name">${u}　様</div>
+          <div class="pr-ym">${cur.y}年${cur.m}月</div>
+          <div class="pr-body">
+            <table class="pr-t">
+              <tr><th>日付</th><th>曜日</th><th>工賃</th><th>備考</th></tr>
+              ${rows}
+              <tr class="tot"><td colspan="2">支給合計</td><td class="yen">¥${total.toLocaleString()}</td><td></td></tr>
+            </table>
+            <div class="pr-com"><div class="h">担当者よりコメント</div><div class="b"></div></div>
+          </div>
+        </div>`);
+    });
+    if(users.length-i===1) page.insertAdjacentHTML('beforeend','<div class="pr-block"></div>');
+    root.appendChild(page);
+  }
+  window.print();
+}
+
+/* ===== views ===== */
+async function renderView(){
+  renderDateBar();
+  if(curView==='entry') await renderEntry();
+  else if(curView==='month') await renderMonth();
+  else if(curView==='wage') await renderWage();
+  else renderSettings();
+}
+async function switchView(v){
+  await flushSaves();
+  curView=v;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  document.getElementById('dateBar').style.display=(v!=='settings')?'':'none';
+  document.getElementById('saveBar').classList.toggle('show',v==='entry');
+  window.scrollTo(0,0);
+  renderFacTabs();
+  await renderView();
+}
+
+/* ===== events ===== */
+document.getElementById('prevBtn').onclick=async()=>{await flushSaves();shiftDate(-1);await renderView();};
+document.getElementById('nextBtn').onclick=async()=>{await flushSaves();shiftDate(1);await renderView();};
+document.getElementById('todayBtn').onclick=async()=>{await flushSaves();const t=new Date();cur={y:t.getFullYear(),m:t.getMonth()+1,d:t.getDate()};await renderView();};
+document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
+document.querySelectorAll('#typeSegE button').forEach(b=>b.onclick=async()=>{
+  await flushSaves();
+  const k=b.dataset.k;
+  if(k==='wA'||k==='wP'){ recType='w'; activeSess=(k==='wA'?'A':'P'); }
+  else{ recType=k; }
+  syncTypeSegs(); await renderView();
+});
+document.querySelectorAll('#typeSegM button').forEach(b=>b.onclick=async()=>{
+  await flushSaves(); recType=b.dataset.t; syncTypeSegs(); await renderView();
+});
+document.getElementById('saveBtn').onclick=async()=>{ await flushSaves(); toast('保存しました'); };
+document.getElementById('exportBtn').onclick=exportExcel;
+document.getElementById('exportBtn2').onclick=exportExcel;
+document.getElementById('exportBtn3').onclick=exportExcel;
+document.getElementById('printBtn').onclick=printStatements;
+document.getElementById('addUserBtn').onclick=async()=>{ config.users[curFac].push(''); await saveConfig(); renderSettings(); };
+document.getElementById('addBathBtn').onclick=async()=>{ config.bathUsers[curFac].push(''); await saveConfig(); renderSettings(); };
+document.getElementById('rate1Input').onchange=async e=>{ config.rate1=Math.max(0,parseInt(e.target.value||'0',10)); await saveConfig(); toast('保存しました'); };
+document.getElementById('rate2Input').onchange=async e=>{ config.rate2=Math.max(0,parseInt(e.target.value||'0',10)); await saveConfig(); toast('保存しました'); };
+document.getElementById('absSwitch').onclick=async()=>{ config.useAbsence=!config.useAbsence; await saveConfig(); renderSettings(); };
+document.getElementById('dlClose').onclick=()=>document.getElementById('dlOverlay').classList.remove('show');
+document.getElementById('dlOverlay').onclick=e=>{ if(e.target.id==='dlOverlay') e.target.classList.remove('show'); };
+
+/* ===== init ===== */
+/* ===== 接続設定・初期化 ===== */
+async function testAndSaveConn(url,key,statEl){
+  statEl.textContent='接続中…'; statEl.style.color='#8A8478';
+  try{
+    const res=await fetch(url,{method:'POST',body:JSON.stringify({action:'getall',accessKey:key})});
+    const j=await res.json();
+    if(!j.ok) throw new Error(j.error==='auth'?'アクセスキーが違います':'エラー: '+j.error);
+    connSave(url,key);
+    serverData=j.data||{};
+    Object.entries(serverData).forEach(([k,v])=>mirrorSet(k,v));
+    online=true;
+    statEl.textContent='✓ 接続できました'; statEl.style.color='#2E7D6B';
+    return true;
+  }catch(e){
+    statEl.textContent='✗ 接続できません（URL・キーを確認）'; statEl.style.color='#C1544E';
+    return false;
+  }
+}
+async function resync(){
+  if(!conn.url) return;
+  try{ await loadAll(); Object.keys(recCache).forEach(k=>delete recCache[k]); config=null; await loadConfig(); await renderView(); }
+  catch(e){ online=false; setConnBadge(); }
+}
+window.addEventListener('visibilitychange',()=>{ if(!document.hidden && dirty.size===0) resync(); });
+
+document.getElementById('suBtn').onclick=async()=>{
+  const ok=await testAndSaveConn(document.getElementById('suUrl').value.trim(),document.getElementById('suKey').value.trim(),document.getElementById('suStat'));
+  if(ok){
+    document.getElementById('setupOverlay').classList.remove('show');
+    await loadConfig(); renderFacTabs(); renderSettings(); await renderView();
+  }
+};
+document.getElementById('connTestBtn').onclick=async()=>{
+  const ok=await testAndSaveConn(document.getElementById('gasUrlInput').value.trim(),document.getElementById('gasKeyInput').value.trim(),document.getElementById('connTestStat'));
+  if(ok){ await resync(); toast('接続設定を保存しました'); }
+};
+
+(async function(){
+  document.getElementById('saveBar').classList.add('show');
+  if(!conn.url){
+    document.getElementById('setupOverlay').classList.add('show');
+    return;
+  }
+  document.getElementById('gasUrlInput')&&(document.getElementById('gasUrlInput').value=conn.url);
+  document.getElementById('gasKeyInput')&&(document.getElementById('gasKeyInput').value=conn.key);
+  try{ await loadAll(); }
+  catch(e){ online=false; setConnBadge(); toast('サーバーに接続できません。端末内のデータで表示します'); }
+  await loadConfig();
+  renderFacTabs();
+  await renderView();
+})();
+</script>
+</body>
+</html>
