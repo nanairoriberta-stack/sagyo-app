@@ -883,7 +883,7 @@ async function exportExcel(){
   ws.getCell('A1').value='作業記録（合算）';
   ws.getCell('I1').value=`${cur.y}年${cur.m}月`;
   ws.getCell('A2').value='日付'; ws.getCell('B2').value='曜日'; ws.getCell('C2').value='営業日';
-  users.forEach((u,i)=>{ const c=ws.getCell(2,4+i); c.value=u; c.alignment={...ctr,wrapText:true}; });
+  users.forEach((u,i)=>{ ws.getCell(2,4+i).value=u; });
   for(let d=1;d<=dim;d++){
     const r=2+d, w=dowOf(cur.y,cur.m,d);
     ws.getCell(r,1).value=d; ws.getCell(r,2).value=WDAY[w];
@@ -895,11 +895,13 @@ async function exportExcel(){
     ws.getCell(totR,4+i).value={formula:`SUM(${L}3:${L}${2+dim})`,result:Object.values(val[u]).reduce((a,b)=>a+(typeof b==='number'?b:0),0)};
   });
   for(let r=2;r<=totR;r++) for(let c=1;c<=3+users.length;c++){
-    const cell=ws.getCell(r,c); cell.border=box; cell.alignment=ctr; cell.font={name:F,size:10};
+    const cell=ws.getCell(r,c); cell.border=box; cell.font={name:F,size:10};
+    if(r===2&&c>=4) cell.alignment={textRotation:'vertical',horizontal:'center',vertical:'middle'}; // 名前は縦書き
+    else cell.alignment=ctr;
   }
   ws.getColumn(1).width=5; ws.getColumn(2).width=5; ws.getColumn(3).width=6;
   users.forEach((u,i)=>ws.getColumn(4+i).width=4.5);
-  ws.getRow(2).height=60;
+  ws.getRow(2).height=95;
 
   /* ---- Sheet2: 明細＆コメント（テンプレート完全再現） ---- */
   const wd=wb.addWorksheet('明細＆コメント');
