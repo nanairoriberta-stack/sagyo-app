@@ -60,6 +60,22 @@
   #typeSegE button.active{background:var(--green);}
   #typeSegM button.active{background:var(--ink);}
 
+  .date-warn{display:none;align-items:center;gap:10px;background:#FBE9E7;border:2px solid var(--red);
+    border-radius:13px;padding:11px 14px;margin-bottom:12px;}
+  .date-warn.show{display:flex;}
+  .date-warn .dw-t{flex:1;font-size:14px;font-weight:800;color:#8A2F2A;line-height:1.5;}
+  .date-warn .dw-t small{display:block;font-weight:600;font-size:12px;color:#A05A55;}
+  .date-warn button{padding:10px 14px;border-radius:11px;border:none;background:var(--red);color:#fff;font-weight:800;font-size:13px;white-space:nowrap;}
+  .daycheck{margin-top:14px;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);}
+  .daycheck .dc-sum{font-size:14px;font-weight:800;margin-bottom:4px;}
+  .daycheck .dc-sub{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;}
+  .daycheck .dc-btn{width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--green);
+    background:var(--green);color:#fff;font-weight:800;font-size:15px;}
+  .daycheck.done{border-color:var(--green);background:var(--green-bg);}
+  .daycheck.done .dc-btn{background:var(--surface);color:var(--green-d);}
+  table.grid tr.unchecked td.day{background:#FBEFDC;}
+  table.grid tr.norec td.day{background:#F7E4E2;}
+  
   .entry-status{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;padding:0 2px;flex-wrap:wrap;}
   .entry-status b{font-size:26px;font-weight:800;color:var(--green-d);}
   .entry-status span{font-size:14px;color:var(--muted);font-weight:700;}
@@ -67,7 +83,7 @@
   .hint{font-size:12.5px;color:var(--muted);margin:0 2px 14px;line-height:1.6;}
 
   .name-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
-  .name-btn{position:relative;min-height:104px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);
+  .name-btn{position:relative;min-height:118px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 8px;overflow:hidden;}
   .name-btn:active{transform:scale(.97);}
   .name-btn .nm{font-size:17px;font-weight:800;line-height:1.2;text-align:center;pointer-events:none;}
@@ -75,6 +91,11 @@
   .name-btn .pill{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1.5px solid var(--line);}
   .name-btn .pill.on{background:var(--green);color:#fff;border-color:var(--green);}
   .name-btn .wg{font-size:12.5px;font-weight:800;color:var(--green-d);min-height:15px;pointer-events:none;}
+  .name-btn .mtot{font-size:11.5px;font-weight:800;color:var(--muted);pointer-events:none;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin-top:1px;}
+  .name-btn .mtot b{color:var(--green-d);font-weight:800;}
+  .name-btn.active-on .mtot{background:rgba(255,255,255,.75);border-color:transparent;}
+  .name-btn.rest .mtot,.name-btn.absent .mtot{background:rgba(255,255,255,.7);border-color:transparent;}
   .name-btn .mark{font-size:30px;font-weight:800;line-height:1;color:var(--line);pointer-events:none;}
   .name-btn.active-on .mark{color:var(--green-d);}
   .name-btn.active-on{background:var(--green-bg);border-color:var(--green);}
@@ -103,6 +124,15 @@
   .btn.ghost{background:var(--surface);color:var(--green-d);}
   .btn.sm{padding:8px 12px;font-size:13px;}
 
+  .util-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px;}
+  .ut-card{background:var(--surface);border:1.5px solid var(--line);border-radius:13px;padding:10px 12px;
+    display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow);}
+  .ut-card .ul{font-size:11.5px;color:var(--muted);font-weight:800;}
+  .ut-card .uv{font-size:22px;font-weight:800;color:var(--ink);line-height:1.1;}
+  .ut-card .uv small{font-size:12px;font-weight:800;margin-left:2px;color:var(--muted);}
+  .ut-card.hi{background:var(--green-bg);border-color:var(--green);}
+  .ut-card.hi .ul,.ut-card.hi .uv{color:var(--green-d);}
+  .ut-card.hi .uv small{color:var(--green-d);}
   .grid-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);}
   table.grid{border-collapse:collapse;font-size:12.5px;white-space:nowrap;min-width:100%;}
   table.grid th,table.grid td{border:1px solid var(--line-2);text-align:center;padding:0;}
@@ -123,6 +153,24 @@
   table.grid.striped tr.zeb td.cell{background:#EDEBE6;}
   table.grid.striped td.cell{color:var(--ink);}
 
+  .grp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:16px;}
+  .grp-card{padding:14px 16px;border-radius:14px;border:1.5px solid var(--green);background:var(--green-bg);}
+  .grp-card .gn{font-size:14px;font-weight:800;color:var(--green-d);}
+  .grp-card .gy{font-size:26px;font-weight:800;color:var(--green-d);margin-top:4px;}
+  .grp-card .gs{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px;}
+  .grp-card.total{border-color:var(--line);background:var(--surface);}
+  .grp-card.total .gn,.grp-card.total .gy{color:var(--ink);}
+  .den-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);margin-bottom:14px;}
+  table.den{border-collapse:collapse;font-size:13px;white-space:nowrap;min-width:100%;}
+  table.den th,table.den td{border:1px solid var(--line-2);padding:7px 10px;text-align:center;}
+  table.den thead th{background:var(--surface-2);font-weight:800;position:sticky;top:0;}
+  table.den td.nm{text-align:left;font-weight:700;position:sticky;left:0;background:var(--surface);min-width:110px;}
+  table.den td.yen{font-weight:800;color:var(--green-d);text-align:right;}
+  table.den td.z{color:var(--line);}
+  table.den tr.sum td{background:#EEF4F1;font-weight:800;border-top:2px solid var(--line);}
+  table.den tr.sum td.nm{background:#EEF4F1;}
+  table.den tr.amt td{background:var(--surface-2);font-weight:800;}
+  table.den tr.amt td.nm{background:var(--surface-2);}
   .wage-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
   .wage-card{padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);}
   .wage-card .wn{font-size:16px;font-weight:800;}
@@ -150,6 +198,12 @@
   .switch.on::after{left:24px;}
   .user-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
   .user-row input{flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);font-size:15px;background:var(--surface-2);}
+  .user-row .lib{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:0 10px;height:40px;border-radius:10px;
+    border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font-size:12.5px;font-weight:800;white-space:nowrap;}
+  .user-row .lib .bx{width:18px;height:18px;border-radius:5px;border:2px solid var(--line);display:inline-flex;
+    align-items:center;justify-content:center;font-size:13px;line-height:1;color:transparent;}
+  .user-row .lib.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);}
+  .user-row .lib.on .bx{border-color:var(--blue);background:var(--blue);color:#fff;}
   .user-row .del{width:40px;height:40px;flex:0 0 auto;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--red);font-size:18px;font-weight:800;}
   .add-user{margin-top:6px;}
 
@@ -238,12 +292,17 @@
       <button data-k="m">給食</button>
       <button data-k="b">入浴</button>
     </div>
+    <div class="date-warn" id="dateWarn">
+      <div class="dw-t" id="dateWarnText"></div>
+      <button id="backToday">今日に戻す</button>
+    </div>
     <div class="entry-status">
       <b id="workedCount">0</b><span id="workedLabel">名が作業（午前）</span>
       <span class="other" id="otherCount"></span>
     </div>
     <p class="hint" id="entryHint"></p>
     <div class="name-grid" id="nameGrid"></div>
+    <div class="daycheck" id="dayCheck"></div>
     <div class="entry-spacer"></div>
   </section>
 
@@ -258,6 +317,7 @@
       <div><h2 id="monthTitle">月間表</h2><div class="sub" id="monthSub"></div></div>
       <div class="acts"><button class="btn ghost sm" id="exportBtn2">Excel出力</button></div>
     </div>
+    <div class="util-bar" id="utilBar"></div>
     <div class="grid-wrap"><div id="gridHolder"></div></div>
   </section>
 
@@ -266,10 +326,13 @@
     <div class="sec-head">
       <div><h2 id="wageTitle">工賃明細</h2><div class="sub" id="wageSub"></div></div>
       <div class="acts">
+        <button class="btn ghost sm" id="denBtn">金種表</button>
         <button class="btn ghost sm" id="printBtn">印刷 (2名/枚)</button>
         <button class="btn sm" id="exportBtn3">Excel出力</button>
       </div>
     </div>
+    <div id="grpSummary"></div>
+    <div class="den-wrap" id="denWrap" style="display:none"><div id="denHolder"></div></div>
     <div class="wage-list" id="wageList"></div>
   </section>
 
@@ -313,6 +376,7 @@
 
     <div class="card set-block">
       <h3>利用者リスト（作業・給食 共通）</h3>
+      <p class="hint" style="margin:0 0 10px">「リベルタ」にチェックを入れた人は、給食のExcelで事業所シートではなく<b>「給食_リベルタ」シート</b>にまとめて出力されます（二重計上されません）。</p>
       <div class="sub" style="margin-bottom:10px;color:var(--muted);font-size:12.5px;font-weight:600" id="userEditFac"></div>
       <div id="userEdit"></div>
       <button class="btn ghost sm add-user" id="addUserBtn">＋ 利用者を追加</button>
@@ -387,9 +451,11 @@ async function loadAll(){
   const j=await gasFetch({action:'getall',accessKey:conn.key});
   serverData=j.data||{};
   Object.entries(serverData).forEach(([k,v])=>mirrorSet(k,v));
-  online=true; setConnBadge();
+  online=true; dataAuthoritative=true; setConnBadge();
   return serverData;
 }
+/* loadAll が成功したか（＝serverDataが信頼できるか） */
+let dataAuthoritative=false;
 const store={
   async get(k){
     if(serverData&&(k in serverData)) return serverData[k];
@@ -402,25 +468,75 @@ const store={
     online=true; setConnBadge();
   }
 };
+/* 記録の保存：サーバの最新を取得してから日別にマージして書き戻す。
+   これにより「読み込み失敗後のタップで月ごと消える」事故を防ぎ、
+   他端末の同時入力も失われにくくなる。 */
+async function saveRecordMerged(key,localObj){
+  let remote={};
+  try{
+    const j=await gasFetch({action:'get',key,accessKey:conn.key});
+    if(j.value){ try{ remote=JSON.parse(j.value)||{}; }catch(e){ remote={}; } }
+  }catch(e){ throw e; }   // 取得できない時は保存しない（上書き事故を防ぐ）
+  const base=(typeof structuredClone==='function')?structuredClone(remote):JSON.parse(JSON.stringify(remote));
+  // このセッションで触った日だけを反映する
+  const touched=touchedDays[key]||{};
+  Object.keys(touched).forEach(day=>{
+    Object.keys(touched[day]).forEach(user=>{
+      const v=(localObj[day]&&localObj[day][user])||'';
+      if(v){ if(!base[day]) base[day]={}; base[day][user]=v; }
+      else if(base[day]){ delete base[day][user]; if(Object.keys(base[day]).length===0) delete base[day]; }
+    });
+  });
+  const json=JSON.stringify(base);
+  if(serverData) serverData[key]=json;
+  mirrorSet(key,json);
+  await gasFetch({action:'set',key,value:json,accessKey:conn.key});
+  // 反映済みのタッチ記録をクリアし、キャッシュも最新に
+  delete touchedDays[key];
+  online=true; setConnBadge();
+  return base;
+}
+/* 変更した日・人を記録しておく（マージ対象を限定するため） */
+const touchedDays={};
+function markTouched(key,day,user){
+  if(!touchedDays[key]) touchedDays[key]={};
+  if(!touchedDays[key][day]) touchedDays[key][day]={};
+  touchedDays[key][day][user]=1;
+  try{ localStorage.setItem('touched',JSON.stringify(touchedDays)); }catch(e){}
+}
 function setConnBadge(){
   const el=document.getElementById('connBadge'); if(!el) return;
-  el.textContent=online?'● 接続中':'● オフライン（端末内に保存中）';
+  el.textContent=online?('● 接続中'+(dirty.size?`（未送信${dirty.size}件）`:'')):'● 未接続（記録はこの端末に保持中／接続後に送信されます）';
   el.style.color=online?'#2E7D6B':'#C1544E';
 }
 
 /* ===== Defaults ===== */
 const DEFAULT_CONFIG={
   facilities:[
-    {id:'f1',name:'生活介護かわつ'},
-    {id:'f2',name:'事業所2'},
-    {id:'f3',name:'事業所3'},
-    {id:'f4',name:'事業所4'}
+    {id:'f1',name:'かわつ'},
+    {id:'f2',name:'あいのて'},
+    {id:'f3',name:'嫁島'},
+    {id:'f4',name:'津田'}
   ],
   users:{
-    f1:['岩垣久美子','早川樹生','猪原瑠歌','石田真央','梶谷光','赤山拓実','田原康大','黒田祐樹','青木美歌','野津彩音','松本渓志','成相光基','井上智史','梶谷葵子','増野翔太','錦織里早','山崎達也','森口彩音','青山聖','ジャンスウェ','藤井暉至','錦織秀二','小林健一'],
-    f2:[],f3:[],f4:[]
+    f1:['猪原瑠歌','赤山拓実','田原慶太','黒田祐樹','青木美歌','ホンスウェイ','錦織秀二','小林健一','米原和志',
+        '岩垣久美子','錦織里早','早川樹生','野津彩香','梶谷光'],
+    f2:['石田真央','松本滉志','成相光基','井上智史','梶谷奏子','増野翔太','山崎達也','森口彩香','青山聖'],
+    f3:['藤井勝至','三澤哲','馬場葵平','門脇司','田中華帆',
+        '中村尚志','園山明莉','竹田真','星野里奈','森和也','津田忍','菊谷彩香','岡本球冴','森井美由',
+        '八壁剛','野津周平','太田優希','小川薫','楢木亜美','須山啓太郎','戸井寛志'],
+    f4:['勝部孝行','竹田寛','田中慶喜','橋本俊輔']
   },
   bathUsers:{ f1:['赤山拓実'], f2:[],f3:[],f4:[] },
+  /* リベルタ対象者（給食は事業所シートでなく給食_リベルタへ） */
+  libertaUsers:['岩垣久美子','錦織里早','早川樹生','野津彩香','梶谷光',
+    '中村尚志','園山明莉','竹田真','星野里奈','森和也','津田忍','菊谷彩香','岡本球冴','森井美由',
+    '八壁剛','野津周平','太田優希','小川薫','楢木亜美','須山啓太郎','戸井寛志'],
+  /* 工賃グループ集計の組み合わせ（事業所ID） */
+  wageGroups:[
+    {name:'かわつ＋あいのて', facs:['f1','f2']},
+    {name:'嫁島＋津田',       facs:['f3','f4']}
+  ],
   rate1:200, rate2:250, useAbsence:false
 };
 const WDAY=['日','月','火','水','木','金','土'];
@@ -463,18 +579,28 @@ function toggleSession(v,s){
 async function loadConfig(){
   const raw=await store.get('config');
   if(raw){ try{ config=JSON.parse(raw); }catch(e){ config=null; } }
-  if(!config){ config=JSON.parse(JSON.stringify(DEFAULT_CONFIG)); await saveConfig(); }
+  if(!config){
+    config=JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    // サーバから読めていない時は保存しない（既存設定の上書き事故を防ぐ）
+    if(dataAuthoritative) await saveConfig();
+  }
   if(config.rate1==null) config.rate1=config.rate??200;
   if(config.rate2==null) config.rate2=250;
   config.useAbsence=!!config.useAbsence;
   config.users=config.users||{};
   config.bathUsers=config.bathUsers||{};
+  if(!Array.isArray(config.libertaUsers)) config.libertaUsers=[];
+  if(!Array.isArray(config.wageGroups)||config.wageGroups.length===0)
+    config.wageGroups=[{name:'かわつ＋あいのて',facs:['f1','f2']},{name:'嫁島＋津田',facs:['f3','f4']}];
   config.facilities.forEach(f=>{
     if(!config.users[f.id]) config.users[f.id]=[];
     if(!config.bathUsers[f.id]) config.bathUsers[f.id]=(f.id==='f1'?['赤山拓実']:[]);
   });
 }
-async function saveConfig(){ await store.set('config',JSON.stringify(config)); }
+async function saveConfig(){
+  if(!dataAuthoritative){ toast('サーバー未接続のため設定を保存できません'); return; }
+  await store.set('config',JSON.stringify(config));
+}
 async function ensureRec(t,fid,ym){
   const k=cacheKey(t,fid,ym);
   if(recCache[k]) return recCache[k];
@@ -492,6 +618,7 @@ function setStateVal(t,fid,ym,day,user,val){
   const k=cacheKey(t,fid,ym); if(!recCache[k])recCache[k]={};
   if(!recCache[k][day])recCache[k][day]={};
   if(val)recCache[k][day][user]=val; else delete recCache[k][day][user];
+  markTouched(storeKey(t,fid,ym),day,user);
 }
 
 /* ===== merged (合算) ===== */
@@ -519,6 +646,26 @@ function getMergedMark(t,ym,day,user){
   return '';
 }
 function typeUserMap(t){ return t==='b'?config.bathUsers:config.users; }
+/* 利用者の所属事業所（最初に見つかった事業所）とグループ */
+function facilityOf(name){
+  for(const f of config.facilities){ if((config.users[f.id]||[]).map(x=>(x||'').trim()).includes(name)) return f; }
+  return null;
+}
+function wageGroupOf(name){
+  const f=facilityOf(name); if(!f) return null;
+  const g=(config.wageGroups||[]).find(g=>g.facs.includes(f.id));
+  return g?{group:g,fac:f}:null;
+}
+/* リベルタ判定・切替 */
+function isLiberta(name){ return (config.libertaUsers||[]).includes(name); }
+async function toggleLiberta(name){
+  if(!Array.isArray(config.libertaUsers)) config.libertaUsers=[];
+  if(!Array.isArray(config.wageGroups)||config.wageGroups.length===0)
+    config.wageGroups=[{name:'かわつ＋あいのて',facs:['f1','f2']},{name:'嫁島＋津田',facs:['f3','f4']}];
+  const i=config.libertaUsers.indexOf(name);
+  if(i>=0) config.libertaUsers.splice(i,1); else config.libertaUsers.push(name);
+  await saveConfig();
+}
 function scopedUsers(t){
   const map=typeUserMap(t);
   return scopeFac===ALL?unionUsers(map):(map[scopeFac]||[]).map(s=>s.trim()).filter(Boolean);
@@ -532,21 +679,40 @@ function scopedState(t,ym,day,user){
 const dirty=new Set(); let saveTimer=null;
 function scheduleSave(t,fid,ym){
   dirty.add(cacheKey(t,fid,ym));
+  persistDirty();
   setSaveState('未保存の変更あり（自動保存されます）');
   clearTimeout(saveTimer);
   saveTimer=setTimeout(flushSaves,700);
 }
+let flushing=false;
 async function flushSaves(){
+  if(flushing) return;
+  flushing=true;
   clearTimeout(saveTimer); saveTimer=null;
-  const keys=[...dirty]; dirty.clear();
+  const keys=[...dirty];          // ← 成功するまで dirty から消さない
   for(const k of keys){
     const [t,rest]=[k.slice(0,1),k.slice(2)];
     const i=rest.lastIndexOf('_'); const fid=rest.slice(0,i), ym=rest.slice(i+1);
-    try{ await store.set(storeKey(t,fid,ym),JSON.stringify(recCache[k]||{})); }
-    catch(e){ dirty.add(k); online=false; setConnBadge(); }
+    const skey=storeKey(t,fid,ym);
+    try{
+      const merged=await saveRecordMerged(skey,recCache[k]||{});
+      recCache[k]=merged;         // サーバの最新（他端末の入力込み）に同期
+      dirty.delete(k);            // 成功した分だけ外す
+    }catch(e){ online=false; setConnBadge(); }
   }
+  persistDirty();
+  flushing=false;
   if(dirty.size===0) setSaveState('保存済み ✓');
-  else{ setSaveState('通信エラー：端末内に保持しています（自動で再送します）'); clearTimeout(saveTimer); saveTimer=setTimeout(flushSaves,8000); }
+  else{ setSaveState('未送信あり：端末内に保持しています（自動で再送します）'); clearTimeout(saveTimer); saveTimer=setTimeout(flushSaves,8000); }
+}
+/* 未送信キーを端末に保存し、アプリを閉じても次回起動時に再送する */
+function persistDirty(){ try{ localStorage.setItem('dirtyKeys',JSON.stringify([...dirty])); }catch(e){} }
+function restoreDirty(){
+  try{
+    const a=JSON.parse(localStorage.getItem('dirtyKeys')||'[]'); a.forEach(k=>dirty.add(k));
+    const t=JSON.parse(localStorage.getItem('touched')||'{}');
+    Object.keys(t).forEach(k=>touchedDays[k]=t[k]);
+  }catch(e){}
 }
 function setSaveState(t){ const el=document.getElementById('saveState'); if(el)el.textContent=t; }
 window.addEventListener('visibilitychange',()=>{ if(document.hidden) flushSaves(); });
@@ -603,15 +769,34 @@ function syncTypeSegs(){
 }
 
 /* ===== ENTRY ===== */
+/* その月の累計（当日を含む・表示中の事業所のみ） */
+function monthTotalFor(u){
+  const ym=ymKey(), dim=daysInMonth(cur.y,cur.m);
+  if(recType==='w'){
+    let days=0,ses=0,yen=0;
+    for(let d=1;d<=dim;d++){
+      const v=getState('w',curFac,ym,d,u); const c=cnt(v);
+      if(c>0){ days++; ses+=c; yen+=wageOf(v); }
+    }
+    return {days,ses,yen};
+  }
+  let n=0;
+  for(let d=1;d<=dim;d++){ if(getState(recType,curFac,ym,d,u)==='○') n++; }
+  return {n};
+}
 function cardHTML(u,v){
   if(recType!=='w'){
-    return `<span class="nm">${u}</span><span class="mark">${v==='○'?'○':'—'}</span>`;
+    const t=monthTotalFor(u);
+    return `<span class="nm">${u}</span><span class="mark">${v==='○'?'○':'—'}</span>`
+         + `<span class="mtot">今月 ${t.n}日</span>`;
   }
   const wg=cnt(v)?('¥'+wageOf(v)+'（'+cnt(v)+'回）'):'';
   const pills=(v==='休'||v==='欠')?'':
     `<span class="sess"><span class="pill ${hasAM(v)?'on':''}">午前</span><span class="pill ${hasPM(v)?'on':''}">午後</span></span>`;
   const badge=config.useAbsence?`<span class="abs-badge">${v==='休'?'休み':v==='欠'?'欠席':'休/欠'}</span>`:'';
-  return `${badge}<span class="nm">${u}</span>${pills}<span class="wg">${wg}</span>`;
+  const t=monthTotalFor(u);
+  const sum=`<span class="mtot">今月 ${t.days}日　<b>¥${t.yen.toLocaleString()}</b></span>`;
+  return `${badge}<span class="nm">${u}</span>${pills}<span class="wg">${wg}</span>${sum}`;
 }
 function cardClass(v){
   if(recType!=='w') return 'name-btn'+(v==='○'?' active-on':'');
@@ -671,7 +856,8 @@ async function renderEntry(){
   if(users.length===0){
     grid.innerHTML=`<div class="empty-note">${recType==='b'?'この事業所には入浴の対象者が登録されていません。<br>「設定 ⚙」→「入浴の対象者」から追加してください。':'この事業所には利用者が登録されていません。<br>「設定 ⚙」→「利用者リスト」から追加してください。'}</div>`;
     document.getElementById('workedCount').textContent='0';
-    document.getElementById('otherCount').textContent=''; updateCounts(); return;
+    document.getElementById('otherCount').textContent=''; updateCounts();
+    renderDateWarn(); renderDayCheck(); return;
   }
   grid.innerHTML='';
   users.forEach(u=>{
@@ -691,6 +877,95 @@ async function renderEntry(){
     grid.appendChild(b);
   });
   updateCounts();
+  renderDateWarn();
+  renderDayCheck();
+}
+
+/* ===== 日付ミス防止：今日以外を編集中なら警告 ===== */
+function todayYMD(){ const t=new Date(); return {y:t.getFullYear(),m:t.getMonth()+1,d:t.getDate()}; }
+function isToday(){ const t=todayYMD(); return cur.y===t.y&&cur.m===t.m&&cur.d===t.d; }
+function renderDateWarn(){
+  const el=document.getElementById('dateWarn'); if(!el) return;
+  if(curView!=='entry'||isToday()){ el.classList.remove('show'); return; }
+  const t=todayYMD();
+  document.getElementById('dateWarnText').innerHTML=
+    `${cur.m}月${cur.d}日 を編集中です<small>今日は ${t.m}月${t.d}日 です。過去の日を修正する場合はこのまま操作してください。</small>`;
+  el.classList.add('show');
+}
+
+/* ===== 日次確認（二重チェック） ===== */
+const checkKey=(fid,ym)=>`chk_${fid}_${ym}`;
+const checkCache={};
+async function ensureCheck(fid,ym){
+  const k=`${fid}_${ym}`;
+  if(checkCache[k]) return checkCache[k];
+  const raw=await store.get(checkKey(fid,ym));
+  let o={}; if(raw){ try{ o=JSON.parse(raw)||{}; }catch(e){ o={}; } }
+  checkCache[k]=o; return o;
+}
+async function setChecked(fid,ym,day,info){
+  const k=`${fid}_${ym}`;
+  if(!checkCache[k]) checkCache[k]={};
+  if(info) checkCache[k][day]=info; else delete checkCache[k][day];
+  await store.set(checkKey(fid,ym),JSON.stringify(checkCache[k]));
+}
+function dayCounts(ym,day){
+  const uw=config.users[curFac]||[], ub=config.bathUsers[curFac]||[];
+  let w=0,m=0,b=0;
+  uw.forEach(u=>{ if(cnt(getState('w',curFac,ym,day,u))>0) w++;
+                  if(getState('m',curFac,ym,day,u)==='○') m++; });
+  ub.forEach(u=>{ if(getState('b',curFac,ym,day,u)==='○') b++; });
+  return {w,m,b};
+}
+async function renderDayCheck(){
+  const el=document.getElementById('dayCheck'); if(!el) return;
+  const ym=ymKey();
+  await ensureRec('w',curFac,ym); await ensureRec('m',curFac,ym); await ensureRec('b',curFac,ym);
+  const chk=await ensureCheck(curFac,ym);
+  const c=dayCounts(ym,cur.d);
+  const done=chk[cur.d];
+  el.className='daycheck'+(done?' done':'');
+  const fac=config.facilities.find(f=>f.id===curFac);
+  el.innerHTML=
+    `<div class="dc-sum">${cur.m}月${cur.d}日 ${fac.name} の記録</div>`
+   +`<div class="dc-sub">作業 ${c.w}名 ・ 給食 ${c.m}名 ・ 入浴 ${c.b}名`
+   +(done?`　／　確認済み（${done.at}）`:'')+`</div>`
+   +`<button class="dc-btn" id="dcBtn">${done?'確認を取り消す':'この日の記録を確認しました'}</button>`;
+  document.getElementById('dcBtn').onclick=async()=>{
+    await flushSaves();
+    if(done){ await setChecked(curFac,ym,cur.d,null); toast('確認を取り消しました'); }
+    else{
+      const now=new Date();
+      const at=`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      await setChecked(curFac,ym,cur.d,{at,w:c.w,m:c.m,b:c.b});
+      toast('確認済みにしました');
+    }
+    renderDayCheck();
+  };
+}
+
+/* ===== 稼働率の計算 =====
+   利用日数 = その人が利用した日数（1回でも2回でも1日）
+   営業日数 = 誰か1人でも利用した日数
+   平均     = 総利用者人数(=利用日数の合計) ÷ 営業日数
+   稼働率   = 平均 ÷ 利用者数 × 100
+*/
+function calcUtilization(ymArg,dim,userList,stateFn){
+  const days={}; let totalVisits=0; let bizDays=0;
+  userList.forEach(u=>days[u]=0);
+  for(let d=1;d<=dim;d++){
+    let any=false;
+    userList.forEach(u=>{
+      const v=stateFn(d,u);
+      const used=(v==='○')||(cnt(v)>0);
+      if(used){ days[u]++; totalVisits++; any=true; }
+    });
+    if(any) bizDays++;
+  }
+  const n=userList.length;
+  const avg=bizDays? totalVisits/bizDays : 0;
+  const rate=n? avg/n*100 : 0;
+  return {days,totalVisits,bizDays,userCount:n,avg,rate};
 }
 
 /* ===== MONTH GRID ===== */
@@ -704,19 +979,31 @@ async function renderMonth(){
   document.getElementById('monthTitle').textContent=`${tn} 月間表 — ${scopeName}`;
   document.getElementById('monthSub').textContent=recType==='w'
     ? `${cur.y}年${cur.m}月 ・ セル数字＝回数（1 or 2）`
-    : `${cur.y}年${cur.m}月 ・ ○＝${recType==='m'?'給食あり':'入浴あり'}`;
+    : `${cur.y}年${cur.m}月 ・ ○＝${recType==='m'?'給食あり':'入浴あり'}${recType==='m'?'　◆＝リベルタ':''}`;
+  const legend=(scopeFac!==ALL)?'　▲＝未確認　!＝営業日だが記録なし':'　（事業所を選ぶと未確認日が表示されます）';
+  document.getElementById('monthSub').textContent+=legend;
   const holder=document.getElementById('gridHolder');
-  if(users.length===0){ holder.innerHTML='<div class="empty-note">対象者が未登録です。</div>'; return; }
+  if(users.length===0){ holder.innerHTML='<div class="empty-note">対象者が未登録です。</div>';
+    const ub=document.getElementById('utilBar'); if(ub) ub.innerHTML=''; return; }
 
   const totals={}; users.forEach(u=>totals[u]=0);
   const striped=recType!=='w';
   let html=`<table class="grid${striped?' striped':''}"><thead><tr><th class="day">日</th><th class="dow">曜</th>`;
-  users.forEach(u=>html+=`<th class="colname">${u}</th>`);
+  users.forEach(u=>{
+    const lb=(recType==='m'&&isLiberta(u))?'<span style="color:#3F78B5">◆</span>':'';
+    html+=`<th class="colname">${u}${lb}</th>`;
+  });
   html+='<th class="total">合計</th></tr></thead><tbody>';
   for(let d=1;d<=dim;d++){
     const w=dowOf(cur.y,cur.m,d);
     const zeb=striped&&d%2===0?' zeb':'';
-    html+=`<tr class="${w===0?'sun':w===6?'sat':''}${zeb}"><td class="day">${d}</td><td class="dow">${WDAY[w]}</td>`;
+    let flag='';
+    if(chk && w!==0 && w!==6){
+      const hasRec=users.some(u=>{ const v=scopedState(recType,ym,d,u); return v==='○'||cnt(v)>0; });
+      if(!chk[d]) flag=hasRec?' unchecked':' norec';
+    }
+    const mk = flag===' norec' ? '<span title="記録なし" style="color:#C1544E">!</span>' : (flag===' unchecked'?'<span title="未確認" style="color:#E0952F">▲</span>':'');
+    html+=`<tr class="${w===0?'sun':w===6?'sat':''}${zeb}${flag}"><td class="day">${d}${mk}</td><td class="dow">${WDAY[w]}</td>`;
     let dt=0;
     users.forEach(u=>{
       const v=scopedState(recType,ym,d,u);
@@ -735,10 +1022,30 @@ async function renderMonth(){
     });
     html+=`<td class="total">${dt||''}</td></tr>`;
   }
+  // 確認状況（事業所を選択している場合のみ）
+  let chk=null;
+  if(scopeFac!==ALL){ chk=await ensureCheck(scopeFac,ym); }
+  const util=calcUtilization(ym,dim,users,(d,u)=>scopedState(recType,ym,d,u));
   html+='<tr class="totrow"><td class="day"></td><td class="dow">計</td>';
   let grand=0; users.forEach(u=>{html+=`<td class="total">${totals[u]}</td>`;grand+=totals[u];});
-  html+=`<td class="total">${grand}</td></tr></tbody></table>`;
+  html+=`<td class="total">${grand}</td></tr>`;
+  html+='<tr class="totrow"><td class="day"></td><td class="dow" style="font-size:11px">利用<br>日数</td>';
+  users.forEach(u=>{html+=`<td class="total">${util.days[u]||''}</td>`;});
+  html+=`<td class="total">${util.totalVisits}</td></tr>`;
+  html+='</tbody></table>';
   holder.innerHTML=html;
+  renderUtilBar(util);
+}
+
+/* 稼働率バーの描画 */
+function renderUtilBar(u){
+  const el=document.getElementById('utilBar'); if(!el) return;
+  el.innerHTML=
+    `<div class="ut-card"><span class="ul">総利用者人数</span><span class="uv">${u.totalVisits}<small>人</small></span></div>`
+   +`<div class="ut-card"><span class="ul">営業日数</span><span class="uv">${u.bizDays}<small>日</small></span></div>`
+   +`<div class="ut-card"><span class="ul">1日平均</span><span class="uv">${u.avg.toFixed(1)}<small>人</small></span></div>`
+   +`<div class="ut-card"><span class="ul">利用者数</span><span class="uv">${u.userCount}<small>人</small></span></div>`
+   +`<div class="ut-card hi"><span class="ul">稼働率</span><span class="uv">${u.rate.toFixed(1)}<small>%</small></span></div>`;
 }
 
 /* ===== WAGE ===== */
@@ -749,7 +1056,9 @@ async function renderWage(){
   const scopeName=scopeFac===ALL?'全体（合算）':config.facilities.find(f=>f.id===scopeFac).name;
   document.getElementById('wageTitle').textContent=`工賃明細 — ${scopeName}`;
   document.getElementById('wageSub').textContent=`${cur.y}年${cur.m}月 ・ 1回¥${config.rate1} / 2回¥${config.rate2}`;
+  renderGroupSummary(ym,dim);
   const list=document.getElementById('wageList');
+  if(document.getElementById('denWrap').style.display!=='none') renderDenom();
   if(users.length===0){ list.innerHTML='<div class="empty-note">利用者が未登録です。</div>'; return; }
   list.innerHTML='';
   users.forEach(u=>{
@@ -771,16 +1080,165 @@ async function renderWage(){
   });
 }
 
+/* ===== 工賃グループ集計（事業所の組み合わせ別） ===== */
+function renderGroupSummary(ym,dim){
+  const el=document.getElementById('grpSummary'); if(!el) return;
+  if(scopeFac!==ALL){ el.innerHTML=''; return; }   // 全体表示のときのみ
+  const groups=config.wageGroups||[];
+  if(groups.length===0){ el.innerHTML=''; return; }
+  const all=mergedUsers();
+  const wageOfUser={};
+  all.forEach(u=>{ let t=0; for(let d=1;d<=dim;d++) t+=wageOf(getMergedState(ym,d,u)); wageOfUser[u]=t; });
+  let html='<div class="grp-cards">'; let grand=0;
+  groups.forEach(g=>{
+    const mem=all.filter(u=>{ const f=facilityOf(u); return f&&g.facs.includes(f.id); });
+    const sum=mem.reduce((a,u)=>a+(wageOfUser[u]||0),0); grand+=sum;
+    html+=`<div class="grp-card"><div class="gn">${g.name}</div>`
+       +  `<div class="gy">¥${sum.toLocaleString()}</div>`
+       +  `<div class="gs">${mem.length}名</div></div>`;
+  });
+  html+=`<div class="grp-card total"><div class="gn">総合計</div>`
+     +  `<div class="gy">¥${grand.toLocaleString()}</div>`
+     +  `<div class="gs">${all.length}名</div></div></div>`;
+  el.innerHTML=html;
+}
+
+/* ===== 金種表（両替の枚数計算） ===== */
+const DENOMS=[5000,1000,500,100,50];
+function denomOf(total){
+  let rest=total;
+  return DENOMS.map(v=>{ const n=Math.floor(rest/v); rest-=n*v; return n; });
+}
+function renderDenom(){
+  const ym=ymKey(); const dim=daysInMonth(cur.y,cur.m);
+  const users=scopedUsers('w');
+  const holder=document.getElementById('denHolder');
+  if(users.length===0){ holder.innerHTML='<div class="empty-note">利用者が未登録です。</div>'; return; }
+  const sums=DENOMS.map(()=>0); let grand=0;
+  let rows='';
+  users.forEach(u=>{
+    let total=0; for(let d=1;d<=dim;d++) total+=wageOf(scopedState('w',ym,d,u));
+    const c=denomOf(total); c.forEach((n,i)=>sums[i]+=n); grand+=total;
+    rows+=`<tr><td class="nm">${u}</td><td class="yen">¥${total.toLocaleString()}</td>`
+        + c.map(n=>`<td class="${n?'':'z'}">${n||'—'}</td>`).join('')
+        + `</tr>`;
+  });
+  const head=`<thead><tr><th>氏名</th><th>金種合計</th>`
+    + DENOMS.map(v=>`<th>${v.toLocaleString()}</th>`).join('') + `</tr></thead>`;
+  const sumRow=`<tr class="sum"><td class="nm">紙幣枚数</td><td class="yen">¥${grand.toLocaleString()}</td>`
+    + sums.map(n=>`<td>${n}</td>`).join('') + `</tr>`;
+  const amtRow=`<tr class="amt"><td class="nm">金種別金額</td><td></td>`
+    + sums.map((n,i)=>`<td>¥${(n*DENOMS[i]).toLocaleString()}</td>`).join('') + `</tr>`;
+  holder.innerHTML=`<table class="den">${head}<tbody>${rows}${sumRow}${amtRow}</tbody></table>`;
+}
+
 /* ===== SETTINGS ===== */
-function userListEditor(holderId,list,onChange){
+/* 改名時：全月・全事業所の記録キーを付け替える */
+async function renameInRecords(oldName,newName){
+  if(!serverData) return {months:0,cells:0};
+  let months=0, cells=0;
+  const keys=Object.keys(serverData).filter(k=>/^rec[MB]?_f\d+_\d{4}-\d{2}$/.test(k));
+  for(const key of keys){
+    let obj;
+    try{ obj=JSON.parse(serverData[key]||'{}'); }catch(e){ continue; }
+    let changed=false;
+    for(const day of Object.keys(obj)){
+      const rec=obj[day];
+      if(rec && Object.prototype.hasOwnProperty.call(rec,oldName)){
+        const v=rec[oldName];
+        delete rec[oldName];
+        if(!Object.prototype.hasOwnProperty.call(rec,newName)) rec[newName]=v; // 既存優先(取り違え防止)
+        changed=true; cells++;
+      }
+      if(rec && Object.keys(rec).length===0) delete obj[day];
+    }
+    if(changed){
+      await store.set(key,JSON.stringify(obj));
+      months++;
+      const ck=key.replace(/^rec_/,'w_').replace(/^recM_/,'m_').replace(/^recB_/,'b_');
+      if(recCache[ck]) delete recCache[ck];
+    }
+  }
+  return {months,cells};
+}
+/* 過去記録に名前が存在するか */
+function recordCountFor(name){
+  if(!serverData) return 0;
+  let n=0;
+  Object.keys(serverData).forEach(k=>{
+    if(!/^rec[MB]?_f\d+_\d{4}-\d{2}$/.test(k)) return;
+    let obj; try{ obj=JSON.parse(serverData[k]||'{}'); }catch(e){ return; }
+    Object.values(obj).forEach(rec=>{ if(rec&&rec[name]!==undefined) n++; });
+  });
+  return n;
+}
+
+function userListEditor(holderId,list,onChange,withLiberta){
   const ue=document.getElementById(holderId); ue.innerHTML='';
   list.forEach((u,i)=>{
     const row=document.createElement('div'); row.className='user-row';
     const inp=document.createElement('input'); inp.type='text'; inp.value=u;
-    inp.onchange=async()=>{ list[i]=inp.value.trim(); await saveConfig(); toast('保存しました'); if(onChange)onChange(); };
+    inp.dataset.prev=u;
+    inp.onchange=async()=>{
+      const oldName=inp.dataset.prev||'';
+      const newName=inp.value.trim();
+      if(newName===oldName){ inp.value=oldName; return; }
+      // 空欄は禁止（誤操作でデータが迷子になるのを防ぐ）
+      if(newName===''){
+        alert('名前は空にできません。削除する場合は右の × を押してください。');
+        inp.value=oldName; return;
+      }
+      const cnt=oldName?recordCountFor(oldName):0;
+      if(oldName && cnt>0){
+        const msg=`「${oldName}」を「${newName}」に変更します。\n\n`
+          +`過去の記録 ${cnt} 件も新しい名前に引き継ぎますか？\n\n`
+          +`［OK］記録も一緒に引き継ぐ（おすすめ）\n`
+          +`［キャンセル］名前だけ変更（過去の記録は「${oldName}」のまま残ります）`;
+        const moveIt=confirm(msg);
+        const li=(config.libertaUsers||[]).indexOf(oldName);
+        if(li>=0) config.libertaUsers[li]=newName;
+        list[i]=newName; await saveConfig();
+        if(moveIt){
+          toast('記録を移しています…');
+          const r=await renameInRecords(oldName,newName);
+          toast(`記録 ${r.cells} 件を「${newName}」に引き継ぎました`);
+        }else{
+          toast('名前のみ変更しました');
+        }
+      }else{
+        list[i]=newName; await saveConfig(); toast('保存しました');
+      }
+      inp.dataset.prev=newName;
+      if(onChange)onChange();
+      renderSettings();
+    };
     const del=document.createElement('button'); del.className='del'; del.textContent='×';
-    del.onclick=async()=>{ list.splice(i,1); await saveConfig(); renderSettings(); };
-    row.appendChild(inp); row.appendChild(del); ue.appendChild(row);
+    del.onclick=async()=>{
+      const nm=list[i]||'';
+      const cnt=nm?recordCountFor(nm):0;
+      const msg=cnt>0
+        ? `「${nm}」をリストから削除します。\n\n過去の記録 ${cnt} 件はサーバーに残りますが、画面には表示されなくなります。\n（同じ名前で登録し直せば再表示されます）\n\n削除しますか？`
+        : `「${nm||'（空欄）'}」をリストから削除しますか？`;
+      if(!confirm(msg)) return;
+      list.splice(i,1); await saveConfig(); renderSettings();
+    };
+    if(withLiberta){
+      const lb=document.createElement('button');
+      const setLb=()=>{ const on=isLiberta(list[i]||'');
+        lb.className='lib'+(on?' on':'');
+        lb.innerHTML=`<span class="bx">✓</span>リベルタ`; };
+      setLb();
+      lb.onclick=async()=>{
+        const nm=(list[i]||'').trim();
+        if(!nm){ alert('先に名前を入力してください。'); return; }
+        await toggleLiberta(nm); setLb();
+        toast(isLiberta(nm)?`${nm} をリベルタに設定しました`:`${nm} のリベルタを解除しました`);
+      };
+      row.appendChild(inp); row.appendChild(lb); row.appendChild(del);
+    }else{
+      row.appendChild(inp); row.appendChild(del);
+    }
+    ue.appendChild(row);
   });
 }
 function renderSettings(){
@@ -801,8 +1259,8 @@ function renderSettings(){
   const fac=config.facilities.find(f=>f.id===curFac);
   document.getElementById('userEditFac').textContent=`編集中の事業所：${fac.name}（上のタブで切り替え）`;
   document.getElementById('bathEditFac').textContent=`編集中の事業所：${fac.name}`;
-  userListEditor('userEdit',config.users[curFac]);
-  userListEditor('bathEdit',config.bathUsers[curFac]);
+  userListEditor('userEdit',config.users[curFac],null,true);
+  userListEditor('bathEdit',config.bathUsers[curFac],null,false);
 }
 
 /* ===== EXCEL EXPORT ===== */
@@ -862,6 +1320,7 @@ async function exportExcel(){
   await flushSaves();
   const ym=ymKey();
   await ensureAll('w',ym); await ensureAll('m',ym); await ensureAll('b',ym);
+  for(const f of config.facilities) await ensureCheck(f.id,ym);
   const dim=daysInMonth(cur.y,cur.m);
   const users=mergedUsers();
   if(users.length===0){ toast('利用者が登録されていません'); return; }
@@ -899,6 +1358,48 @@ async function exportExcel(){
     if(r===2&&c>=4) cell.alignment={textRotation:'vertical',horizontal:'center',vertical:'middle'}; // 名前は縦書き
     else cell.alignment=ctr;
   }
+  /* --- 利用日数・工賃日数・稼働率（紙の様式と同じ集計） --- */
+  const utl=calcUtilization(ym,dim,users,(d,u)=>getMergedState(ym,d,u));
+  const rUse=totR+1, rWage=totR+2;
+  ws.getCell(rUse,3).value='利用日数'; ws.getCell(rWage,3).value='工賃日数';
+  users.forEach((u,i)=>{
+    const L=colL(4+i);
+    const c1=ws.getCell(rUse,4+i);
+    c1.value={formula:`COUNTIF(${L}3:${L}${2+dim},">0")`,result:utl.days[u]||0};
+    const c2=ws.getCell(rWage,4+i);
+    let wd=0; for(let d=1;d<=dim;d++) if(cnt(getMergedState(ym,d,u))>0) wd++;
+    c2.value={formula:`COUNTIF(${L}3:${L}${2+dim},">0")`,result:wd};
+  });
+  const lastCol=colL(3+users.length);
+  ws.getCell(rUse,3+users.length+1).value={formula:`SUM(D${rUse}:${lastCol}${rUse})`,result:utl.totalVisits};
+  for(let c=3;c<=3+users.length+1;c++) for(const r of [rUse,rWage]){
+    const cell=ws.getCell(r,c); cell.border=box; cell.alignment=ctr; cell.font={name:F,size:9,bold:c===3};
+  }
+  /* 稼働率ブロック */
+  const rb=rWage+2;
+  // ラベル3列＋値2列を結合して配置（列幅が狭いため）
+  const put=(row,c0,label,val)=>{
+    ws.mergeCells(row,c0,row,c0+2);
+    const a=ws.getCell(row,c0); a.value=label; a.font={name:F,size:10,bold:true}; a.alignment=ctr;
+    for(let k=0;k<3;k++) ws.getCell(row,c0+k).border=box;
+    ws.mergeCells(row,c0+3,row,c0+4);
+    const b=ws.getCell(row,c0+3); b.value=val; b.font={name:F,size:11}; b.alignment=ctr;
+    for(let k=3;k<5;k++) ws.getCell(row,c0+k).border=box;
+    return b;
+  };
+  const cellRef=(row,c0)=>`${colL(c0+3)}${row}`;   // 値セルの参照
+  put(rb,1,'総利用者人数',{formula:`${colL(3+users.length+1)}${rUse}`,result:utl.totalVisits});
+  put(rb,6,'日数',utl.bizDays);
+  const refTotal=cellRef(rb,1), refDays=cellRef(rb,6);
+  put(rb,11,'平均（人/日）',{formula:`IF(${refDays}=0,0,ROUND(${refTotal}/${refDays},1))`,result:Math.round(utl.avg*10)/10});
+  put(rb+1,1,'利用者数',users.length);
+  const refUsers=cellRef(rb+1,1);
+  const rc=put(rb+1,6,'稼働率（％）',
+    {formula:`IF(OR(${refDays}=0,${refUsers}=0),0,ROUND(${refTotal}/${refDays}/${refUsers}*100,1))`,
+     result:Math.round(utl.rate*10)/10});
+  rc.font={name:F,size:12,bold:true};
+  rc.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE4F1EC'}};
+
   ws.getColumn(1).width=5; ws.getColumn(2).width=5; ws.getColumn(3).width=6;
   users.forEach((u,i)=>ws.getColumn(4+i).width=4.5);
   ws.getRow(2).height=95;
@@ -959,14 +1460,147 @@ async function exportExcel(){
     margins:{left:0.2,right:0.04,top:0.75,bottom:0.75,header:0.31,footer:0.31},
     printArea:`A1:N${lastRow+2}`};
 
-  /* ---- Sheet3: 給食（縞模様） ---- */
-  buildMarkSheet(wb,'給食',users,(d,u)=>getMergedMark('m',ym,d,u),ctx);
+  /* ---- Sheet3: 工賃金種（金種別の枚数表） ---- */
+  const wk=wb.addWorksheet('工賃金種');
+  const DEN=[5000,1000,500,100,50];
+  const CNT_FMT='#,##0_ ;[Red]\\-#,##0\\ ';
+  const SUM_FMT='#,##0_);[Red](#,##0)';
+  wk.mergeCells('A1:B1');
+  const a1=wk.getCell('A1'); a1.value={formula:`'${msn}'!I1`,result:`${cur.y}年${cur.m}月`};
+  a1.font={name:F,size:9}; a1.alignment=ctr;
+  wk.getCell('C1').value='工賃金種別表'; wk.getCell('C1').font={name:F,size:11};
+  [['A3','氏名'],['B3','金種合計'],['C3',5000],['E3',1000],['G3',500],['I3',100],['K3',50],
+   ['L3','金種合計'],['M3','明細ＬＩＮＫ']].forEach(([cd,v])=>{
+    const c=wk.getCell(cd); c.value=v; c.font={name:F,size:9}; c.alignment=ctr; c.border=box;
+  });
+  ['D3','F3','H3','J3'].forEach(cd=>{ wk.getCell(cd).border=box; });
+  const detailCell=(idx)=>{ const bi=Math.floor(idx/2), sd=idx%2; return {col:(sd===0?'D':'K'), row:bi*pitch+5+dim}; };
+  const cntCols=[3,5,7,9,11], hidCols=[4,6,8,10];
+  users.forEach((u,i)=>{
+    const r=4+i, dc=detailCell(i);
+    let total=0; for(let d=1;d<=dim;d++) total+=wageOf(getMergedState(ym,d,u));
+    let rest=total; const cnts=DEN.map(v=>{ const n=Math.floor(rest/v); rest-=n*v; return n; });
+    const nm=wk.getCell(r,1); nm.value={formula:`'${msn}'!${colL(4+i)}2`,result:u};
+    nm.font={name:F,size:9}; nm.alignment=ctr; nm.border=box;
+    const bt=wk.getCell(r,2); bt.value={formula:`'明細＆コメント'!$${dc.col}$${dc.row}`,result:total};
+    bt.numFmt=YEN; bt.font={name:F,size:11}; bt.border=box;
+    cntCols.forEach((cc,k)=>{
+      const prev=(k===0)?'B':colL(hidCols[k-1]);
+      const c=wk.getCell(r,cc);
+      c.value={formula:`IF(${prev}${r}>=${DEN[k]},ROUNDDOWN(${prev}${r}/${DEN[k]},0),0)`,result:cnts[k]};
+      c.numFmt=CNT_FMT; c.font={name:F,size:11}; c.border=box;
+    });
+    hidCols.forEach((hc,k)=>{
+      const prev=(k===0)?'B':colL(hidCols[k-1]);
+      let rem=total; for(let q=0;q<=k;q++) rem-=cnts[q]*DEN[q];
+      const c=wk.getCell(r,hc);
+      c.value={formula:`${prev}${r}-${colL(cntCols[k])}${r}*${DEN[k]}`,result:rem};
+      c.font={name:F,size:11};
+    });
+    const lt=wk.getCell(r,12);
+    lt.value={formula:`C${r}*C$3+E${r}*E$3+G${r}*G$3+I${r}*I$3+K${r}*K$3`,result:total};
+    lt.font={name:F,size:11}; lt.border=box;
+    const lk=wk.getCell(r,13);
+    lk.value={formula:`'明細＆コメント'!${dc.col}${dc.row}`,result:total};
+    lk.font={name:F,size:11}; lk.border=box;
+    wk.getRow(r).height=20.1;
+  });
+  const lastU=3+users.length, rSum=4+users.length, rAmt=rSum+1;
+  const sc=wk.getCell(rSum,1); sc.value='紙幣枚数'; sc.font={name:F,size:8}; sc.alignment=ctr; sc.border=box;
+  for(let cc=2;cc<=11;cc++){
+    const L=colL(cc); const c=wk.getCell(rSum,cc);
+    c.value={formula:`SUM(${L}4:${L}${lastU})`};
+    c.numFmt=(cc===2)?YEN:SUM_FMT; c.font={name:F,size:11}; c.border=box;
+  }
+  const lsum=wk.getCell(rSum,12);
+  lsum.value={formula:`C${rSum}*C$3+E${rSum}*E$3+G${rSum}*G$3+I${rSum}*I$3+K${rSum}*K$3`};
+  lsum.numFmt=YEN; lsum.font={name:F,size:11}; lsum.border=box;
+  const msum=wk.getCell(rSum,13);
+  msum.value={formula:`SUM(M4:M${lastU})`}; msum.numFmt=YEN; msum.font={name:F,size:11}; msum.border=box;
+  const ac=wk.getCell(rAmt,1); ac.value='金種別金額'; ac.font={name:F,size:8}; ac.alignment=ctr; ac.border=box;
+  cntCols.forEach((cc,k)=>{
+    const L=colL(cc); const c=wk.getCell(rAmt,cc);
+    c.value={formula:`${L}${rSum}*${DEN[k]}`};
+    c.numFmt=YEN; c.font={name:F,size:11}; c.border=box;
+  });
+  wk.getCell(rAmt+2,12).value='上記欄正しいか確認';
+  wk.getCell(rAmt+2,12).font={name:F,size:11}; wk.getCell(rAmt+2,12).alignment=ctr;
+  [1,3,5,7,9,11].forEach(c=>wk.getColumn(c).width=8.125);
+  wk.getColumn(2).width=10; wk.getColumn(12).width=10; wk.getColumn(13).width=11;
+  hidCols.forEach(c=>{ wk.getColumn(c).hidden=true; wk.getColumn(c).width=0.125; });
+  wk.pageSetup={orientation:'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,
+    margins:{left:0.4,right:0.4,top:0.6,bottom:0.6,header:0.3,footer:0.3}};
 
-  /* ---- Sheet4: 入浴（縞模様） ---- */
+  /* ---- Sheet4: 給食（事業所別＋リベルタ／縞模様） ---- */
+  const libertaSet=new Set(config.libertaUsers||[]);
+  // 事業所ごと（リベルタ対象者は除外）
+  config.facilities.forEach(f=>{
+    const fu=(config.users[f.id]||[]).map(x=>(x||'').trim()).filter(x=>x&&!libertaSet.has(x));
+    if(fu.length===0) return;
+    const nm=('給食_'+f.name).replace(/[\\\/\?\*\[\]:]/g,'').slice(0,31);
+    buildMarkSheet(wb,nm,fu,(d,u)=>getState('m',f.id,ym,d,u)==='○'?'○':'',ctx);
+  });
+  // リベルタ（事業所横断・合算）
+  const libU=users.filter(u=>libertaSet.has(u));
+  if(libU.length>0) buildMarkSheet(wb,'給食_リベルタ',libU,(d,u)=>getMergedMark('m',ym,d,u),ctx);
+
+  /* ---- Sheet5: 入浴（縞模様） ---- */
   const bathU=mergedBathUsers();
   if(bathU.length>0) buildMarkSheet(wb,'入浴',bathU,(d,u)=>getMergedMark('b',ym,d,u),ctx);
 
-  /* ---- Sheet5: 全体集計 ---- */
+  /* ---- Sheet6: 工賃グループ集計 ---- */
+  const wg=wb.addWorksheet('工賃グループ集計');
+  wg.getCell('A1').value='工賃 グループ別集計';
+  wg.getCell('A1').font={name:F,size:13,bold:true};
+  wg.getCell('E1').value={formula:`'${msn}'!I1`,result:`${cur.y}年${cur.m}月`};
+  wg.getCell('E1').font={name:F,size:11};
+  const wageOfUser={};
+  users.forEach(u=>{ let t=0; for(let d=1;d<=dim;d++) t+=wageOf(getMergedState(ym,d,u)); wageOfUser[u]=t; });
+  let gr=3; const gTotRows=[];
+  (config.wageGroups||[]).forEach(g=>{
+    const mem=users.filter(u=>{ const f=facilityOf(u); return f&&g.facs.includes(f.id); });
+    wg.mergeCells(gr,1,gr,3);
+    const gh=wg.getCell(gr,1); gh.value=g.name; gh.font={name:F,size:12,bold:true};
+    gh.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE4F1EC'}};
+    gr++;
+    ['氏名','所属','工賃'].forEach((h,i)=>{
+      const c=wg.getCell(gr,1+i); c.value=h; c.font={name:F,size:10,bold:true};
+      c.alignment=ctr; c.border=box;
+      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFBF9F4'}};
+    });
+    gr++;
+    const st=gr;
+    mem.forEach(u=>{
+      const f=facilityOf(u);
+      const c1=wg.getCell(gr,1); c1.value=u; c1.font={name:F,size:10}; c1.border=box;
+      const c2=wg.getCell(gr,2); c2.value=(f?f.name:'')+(isLiberta(u)?'／リベルタ':'');
+      c2.font={name:F,size:10}; c2.alignment=ctr; c2.border=box;
+      const c3=wg.getCell(gr,3); c3.value=wageOfUser[u]||0;
+      c3.numFmt=YEN; c3.font={name:F,size:10}; c3.border=box;
+      gr++;
+    });
+    const en=gr-1;
+    wg.mergeCells(gr,1,gr,2);
+    const t1=wg.getCell(gr,1); t1.value=`${g.name} 合計（${mem.length}名）`;
+    t1.font={name:F,size:11,bold:true}; t1.border=box;
+    wg.getCell(gr,2).border=box;
+    const t3=wg.getCell(gr,3);
+    t3.value= mem.length? {formula:`SUM(C${st}:C${en})`,result:mem.reduce((a,u)=>a+(wageOfUser[u]||0),0)} : 0;
+    t3.numFmt=YEN; t3.font={name:F,size:12,bold:true}; t3.border=box;
+    t3.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEEF4F1'}};
+    gTotRows.push(gr); gr+=2;
+  });
+  wg.mergeCells(gr,1,gr,2);
+  const gt1=wg.getCell(gr,1); gt1.value='総合計'; gt1.font={name:F,size:11,bold:true}; gt1.border=box;
+  wg.getCell(gr,2).border=box;
+  const gt3=wg.getCell(gr,3);
+  gt3.value= gTotRows.length? {formula:gTotRows.map(r=>'C'+r).join('+'),
+    result:users.reduce((a,u)=>a+(wageOfUser[u]||0),0)} : 0;
+  gt3.numFmt=YEN; gt3.font={name:F,size:12,bold:true}; gt3.border=box;
+  wg.getColumn(1).width=16; wg.getColumn(2).width=16; wg.getColumn(3).width=12;
+  wg.pageSetup={orientation:'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
+
+  /* ---- Sheet7: 全体集計 ---- */
   const s3=wb.addWorksheet('全体集計');
   s3.addRow(['利用者','作業日数','回数計','工賃合計(円)','給食(日)','入浴(日)']);
   users.forEach(u=>{
@@ -980,6 +1614,41 @@ async function exportExcel(){
   });
   s3.columns=[{width:16},{width:10},{width:8},{width:14},{width:9},{width:9}];
   s3.eachRow((r,ri)=>r.eachCell(c=>{c.font={name:F,size:11,bold:ri===1};}));
+
+  /* ---- 確認状況（日次チェック）---- */
+  const cs=wb.addWorksheet('確認状況');
+  cs.getCell('A1').value=`${cur.y}年${cur.m}月　日次確認の状況`;
+  cs.getCell('A1').font={name:F,size:13,bold:true};
+  cs.getCell('A2').value='×＝未確認　-＝記録なし　日付が営業日(土日除く)の行のみ確認対象';
+  cs.getCell('A2').font={name:F,size:9};
+  const hrow=4;
+  cs.getCell(hrow,1).value='日付'; cs.getCell(hrow,2).value='曜日';
+  config.facilities.forEach((f,i)=>{ cs.getCell(hrow,3+i).value=f.name; });
+  for(let c=1;c<=2+config.facilities.length;c++){
+    const cell=cs.getCell(hrow,c); cell.font={name:F,size:10,bold:true}; cell.alignment=ctr; cell.border=box;
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE4F1EC'}};
+  }
+  for(let d=1;d<=dim;d++){
+    const r=hrow+d, w=dowOf(cur.y,cur.m,d);
+    cs.getCell(r,1).value=d; cs.getCell(r,2).value=WDAY[w];
+    config.facilities.forEach((f,i)=>{
+      const ck=checkCache[`${f.id}_${ym}`]||{};
+      const users2=config.users[f.id]||[];
+      const has=users2.some(u=>cnt(getState('w',f.id,ym,d,u))>0||getState('m',f.id,ym,d,u)==='○');
+      let v='';
+      if(w===0||w===6) v='';
+      else if(ck[d]) v='✓';
+      else if(has) v='×';
+      else v='-';
+      const cell=cs.getCell(r,3+i); cell.value=v; cell.alignment=ctr; cell.font={name:F,size:10};
+      if(v==='×') cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFBEFDC'}};
+      if(v==='-') cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF7E4E2'}};
+    });
+    for(let c=1;c<=2+config.facilities.length;c++) cs.getCell(r,c).border=box;
+  }
+  cs.getColumn(1).width=6; cs.getColumn(2).width=6;
+  config.facilities.forEach((f,i)=>cs.getColumn(3+i).width=12);
+  cs.pageSetup={orientation:'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:1};
 
   const buf=await wb.xlsx.writeBuffer();
   const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -1054,6 +1723,9 @@ async function switchView(v){
 /* ===== events ===== */
 document.getElementById('prevBtn').onclick=async()=>{await flushSaves();shiftDate(-1);await renderView();};
 document.getElementById('nextBtn').onclick=async()=>{await flushSaves();shiftDate(1);await renderView();};
+document.getElementById('backToday').onclick=async()=>{
+  await flushSaves(); const t=todayYMD(); cur={y:t.y,m:t.m,d:t.d}; await renderView();
+};
 document.getElementById('todayBtn').onclick=async()=>{await flushSaves();const t=new Date();cur={y:t.getFullYear(),m:t.getMonth()+1,d:t.getDate()};await renderView();};
 document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 document.querySelectorAll('#typeSegE button').forEach(b=>b.onclick=async()=>{
@@ -1071,6 +1743,13 @@ document.getElementById('exportBtn').onclick=exportExcel;
 document.getElementById('exportBtn2').onclick=exportExcel;
 document.getElementById('exportBtn3').onclick=exportExcel;
 document.getElementById('printBtn').onclick=printStatements;
+document.getElementById('denBtn').onclick=()=>{
+  const w=document.getElementById('denWrap');
+  const show=(w.style.display==='none');
+  w.style.display=show?'':'none';
+  document.getElementById('denBtn').textContent=show?'金種表を閉じる':'金種表';
+  if(show) renderDenom();
+};
 document.getElementById('addUserBtn').onclick=async()=>{ config.users[curFac].push(''); await saveConfig(); renderSettings(); };
 document.getElementById('addBathBtn').onclick=async()=>{ config.bathUsers[curFac].push(''); await saveConfig(); renderSettings(); };
 document.getElementById('rate1Input').onchange=async e=>{ config.rate1=Math.max(0,parseInt(e.target.value||'0',10)); await saveConfig(); toast('保存しました'); };
@@ -1090,7 +1769,7 @@ async function testAndSaveConn(url,key,statEl){
     connSave(url,key);
     serverData=j.data||{};
     Object.entries(serverData).forEach(([k,v])=>mirrorSet(k,v));
-    online=true;
+    online=true; dataAuthoritative=true;
     statEl.textContent='✓ 接続できました'; statEl.style.color='#2E7D6B';
     return true;
   }catch(e){
@@ -1100,10 +1779,20 @@ async function testAndSaveConn(url,key,statEl){
 }
 async function resync(){
   if(!conn.url) return;
+  if(dirty.size>0) return;   // 未送信があるうちは再取得しない（巻き戻し防止）
   try{ await loadAll(); Object.keys(recCache).forEach(k=>delete recCache[k]); config=null; await loadConfig(); await renderView(); }
   catch(e){ online=false; setConnBadge(); }
 }
-window.addEventListener('visibilitychange',()=>{ if(!document.hidden && dirty.size===0) resync(); });
+window.addEventListener('visibilitychange',async()=>{
+  if(document.hidden) return;
+  if(curView==='entry'&&!isToday()){
+    const t=todayYMD();
+    const dt=new Date(cur.y,cur.m-1,cur.d), now=new Date(t.y,t.m-1,t.d);
+    if(dt<now){ cur={y:t.y,m:t.m,d:t.d}; }   // 日付をまたいだら今日に戻す
+  }
+  if(dirty.size>0){ await flushSaves(); }      // 先に未送信を送り切る
+  if(dirty.size===0) resync();                 // 送り切れた時だけ再取得
+});
 
 document.getElementById('suBtn').onclick=async()=>{
   const ok=await testAndSaveConn(document.getElementById('suUrl').value.trim(),document.getElementById('suKey').value.trim(),document.getElementById('suStat'));
@@ -1118,6 +1807,7 @@ document.getElementById('connTestBtn').onclick=async()=>{
 };
 
 (async function(){
+  { const t=todayYMD(); cur={y:t.y,m:t.m,d:t.d}; }   // 起動時は必ず今日
   document.getElementById('saveBar').classList.add('show');
   if(!conn.url){
     document.getElementById('setupOverlay').classList.add('show');
@@ -1125,8 +1815,11 @@ document.getElementById('connTestBtn').onclick=async()=>{
   }
   document.getElementById('gasUrlInput')&&(document.getElementById('gasUrlInput').value=conn.url);
   document.getElementById('gasKeyInput')&&(document.getElementById('gasKeyInput').value=conn.key);
+  restoreDirty();
   try{ await loadAll(); }
-  catch(e){ online=false; setConnBadge(); toast('サーバーに接続できません。端末内のデータで表示します'); }
+  catch(e){ online=false; dataAuthoritative=false; setConnBadge();
+    toast('サーバーに接続できません。表示のみ・保存は接続後に行われます'); }
+  if(dirty.size>0 && dataAuthoritative){ await flushSaves(); }   // 前回の未送信を再送
   await loadConfig();
   renderFacTabs();
   await renderView();
