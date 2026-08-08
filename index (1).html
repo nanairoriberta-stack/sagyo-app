@@ -60,6 +60,22 @@
   #typeSegE button.active{background:var(--green);}
   #typeSegM button.active{background:var(--ink);}
 
+  .date-warn{display:none;align-items:center;gap:10px;background:#FBE9E7;border:2px solid var(--red);
+    border-radius:13px;padding:11px 14px;margin-bottom:12px;}
+  .date-warn.show{display:flex;}
+  .date-warn .dw-t{flex:1;font-size:14px;font-weight:800;color:#8A2F2A;line-height:1.5;}
+  .date-warn .dw-t small{display:block;font-weight:600;font-size:12px;color:#A05A55;}
+  .date-warn button{padding:10px 14px;border-radius:11px;border:none;background:var(--red);color:#fff;font-weight:800;font-size:13px;white-space:nowrap;}
+  .daycheck{margin-top:14px;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);}
+  .daycheck .dc-sum{font-size:14px;font-weight:800;margin-bottom:4px;}
+  .daycheck .dc-sub{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;}
+  .daycheck .dc-btn{width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--green);
+    background:var(--green);color:#fff;font-weight:800;font-size:15px;}
+  .daycheck.done{border-color:var(--green);background:var(--green-bg);}
+  .daycheck.done .dc-btn{background:var(--surface);color:var(--green-d);}
+  table.grid tr.unchecked td.day{background:#FBEFDC;}
+  table.grid tr.norec td.day{background:#F7E4E2;}
+  
   .entry-status{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;padding:0 2px;flex-wrap:wrap;}
   .entry-status b{font-size:26px;font-weight:800;color:var(--green-d);}
   .entry-status span{font-size:14px;color:var(--muted);font-weight:700;}
@@ -67,7 +83,7 @@
   .hint{font-size:12.5px;color:var(--muted);margin:0 2px 14px;line-height:1.6;}
 
   .name-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
-  .name-btn{position:relative;min-height:104px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);
+  .name-btn{position:relative;min-height:118px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 8px;overflow:hidden;}
   .name-btn:active{transform:scale(.97);}
   .name-btn .nm{font-size:17px;font-weight:800;line-height:1.2;text-align:center;pointer-events:none;}
@@ -75,6 +91,11 @@
   .name-btn .pill{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1.5px solid var(--line);}
   .name-btn .pill.on{background:var(--green);color:#fff;border-color:var(--green);}
   .name-btn .wg{font-size:12.5px;font-weight:800;color:var(--green-d);min-height:15px;pointer-events:none;}
+  .name-btn .mtot{font-size:11.5px;font-weight:800;color:var(--muted);pointer-events:none;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin-top:1px;}
+  .name-btn .mtot b{color:var(--green-d);font-weight:800;}
+  .name-btn.active-on .mtot{background:rgba(255,255,255,.75);border-color:transparent;}
+  .name-btn.rest .mtot,.name-btn.absent .mtot{background:rgba(255,255,255,.7);border-color:transparent;}
   .name-btn .mark{font-size:30px;font-weight:800;line-height:1;color:var(--line);pointer-events:none;}
   .name-btn.active-on .mark{color:var(--green-d);}
   .name-btn.active-on{background:var(--green-bg);border-color:var(--green);}
@@ -271,12 +292,17 @@
       <button data-k="m">給食</button>
       <button data-k="b">入浴</button>
     </div>
+    <div class="date-warn" id="dateWarn">
+      <div class="dw-t" id="dateWarnText"></div>
+      <button id="backToday">今日に戻す</button>
+    </div>
     <div class="entry-status">
       <b id="workedCount">0</b><span id="workedLabel">名が作業（午前）</span>
       <span class="other" id="otherCount"></span>
     </div>
     <p class="hint" id="entryHint"></p>
     <div class="name-grid" id="nameGrid"></div>
+    <div class="daycheck" id="dayCheck"></div>
     <div class="entry-spacer"></div>
   </section>
 
@@ -743,15 +769,34 @@ function syncTypeSegs(){
 }
 
 /* ===== ENTRY ===== */
+/* その月の累計（当日を含む・表示中の事業所のみ） */
+function monthTotalFor(u){
+  const ym=ymKey(), dim=daysInMonth(cur.y,cur.m);
+  if(recType==='w'){
+    let days=0,ses=0,yen=0;
+    for(let d=1;d<=dim;d++){
+      const v=getState('w',curFac,ym,d,u); const c=cnt(v);
+      if(c>0){ days++; ses+=c; yen+=wageOf(v); }
+    }
+    return {days,ses,yen};
+  }
+  let n=0;
+  for(let d=1;d<=dim;d++){ if(getState(recType,curFac,ym,d,u)==='○') n++; }
+  return {n};
+}
 function cardHTML(u,v){
   if(recType!=='w'){
-    return `<span class="nm">${u}</span><span class="mark">${v==='○'?'○':'—'}</span>`;
+    const t=monthTotalFor(u);
+    return `<span class="nm">${u}</span><span class="mark">${v==='○'?'○':'—'}</span>`
+         + `<span class="mtot">今月 ${t.n}日</span>`;
   }
   const wg=cnt(v)?('¥'+wageOf(v)+'（'+cnt(v)+'回）'):'';
   const pills=(v==='休'||v==='欠')?'':
     `<span class="sess"><span class="pill ${hasAM(v)?'on':''}">午前</span><span class="pill ${hasPM(v)?'on':''}">午後</span></span>`;
   const badge=config.useAbsence?`<span class="abs-badge">${v==='休'?'休み':v==='欠'?'欠席':'休/欠'}</span>`:'';
-  return `${badge}<span class="nm">${u}</span>${pills}<span class="wg">${wg}</span>`;
+  const t=monthTotalFor(u);
+  const sum=`<span class="mtot">今月 ${t.days}日　<b>¥${t.yen.toLocaleString()}</b></span>`;
+  return `${badge}<span class="nm">${u}</span>${pills}<span class="wg">${wg}</span>${sum}`;
 }
 function cardClass(v){
   if(recType!=='w') return 'name-btn'+(v==='○'?' active-on':'');
@@ -811,7 +856,8 @@ async function renderEntry(){
   if(users.length===0){
     grid.innerHTML=`<div class="empty-note">${recType==='b'?'この事業所には入浴の対象者が登録されていません。<br>「設定 ⚙」→「入浴の対象者」から追加してください。':'この事業所には利用者が登録されていません。<br>「設定 ⚙」→「利用者リスト」から追加してください。'}</div>`;
     document.getElementById('workedCount').textContent='0';
-    document.getElementById('otherCount').textContent=''; updateCounts(); return;
+    document.getElementById('otherCount').textContent=''; updateCounts();
+    renderDateWarn(); renderDayCheck(); return;
   }
   grid.innerHTML='';
   users.forEach(u=>{
@@ -831,6 +877,71 @@ async function renderEntry(){
     grid.appendChild(b);
   });
   updateCounts();
+  renderDateWarn();
+  renderDayCheck();
+}
+
+/* ===== 日付ミス防止：今日以外を編集中なら警告 ===== */
+function todayYMD(){ const t=new Date(); return {y:t.getFullYear(),m:t.getMonth()+1,d:t.getDate()}; }
+function isToday(){ const t=todayYMD(); return cur.y===t.y&&cur.m===t.m&&cur.d===t.d; }
+function renderDateWarn(){
+  const el=document.getElementById('dateWarn'); if(!el) return;
+  if(curView!=='entry'||isToday()){ el.classList.remove('show'); return; }
+  const t=todayYMD();
+  document.getElementById('dateWarnText').innerHTML=
+    `${cur.m}月${cur.d}日 を編集中です<small>今日は ${t.m}月${t.d}日 です。過去の日を修正する場合はこのまま操作してください。</small>`;
+  el.classList.add('show');
+}
+
+/* ===== 日次確認（二重チェック） ===== */
+const checkKey=(fid,ym)=>`chk_${fid}_${ym}`;
+const checkCache={};
+async function ensureCheck(fid,ym){
+  const k=`${fid}_${ym}`;
+  if(checkCache[k]) return checkCache[k];
+  const raw=await store.get(checkKey(fid,ym));
+  let o={}; if(raw){ try{ o=JSON.parse(raw)||{}; }catch(e){ o={}; } }
+  checkCache[k]=o; return o;
+}
+async function setChecked(fid,ym,day,info){
+  const k=`${fid}_${ym}`;
+  if(!checkCache[k]) checkCache[k]={};
+  if(info) checkCache[k][day]=info; else delete checkCache[k][day];
+  await store.set(checkKey(fid,ym),JSON.stringify(checkCache[k]));
+}
+function dayCounts(ym,day){
+  const uw=config.users[curFac]||[], ub=config.bathUsers[curFac]||[];
+  let w=0,m=0,b=0;
+  uw.forEach(u=>{ if(cnt(getState('w',curFac,ym,day,u))>0) w++;
+                  if(getState('m',curFac,ym,day,u)==='○') m++; });
+  ub.forEach(u=>{ if(getState('b',curFac,ym,day,u)==='○') b++; });
+  return {w,m,b};
+}
+async function renderDayCheck(){
+  const el=document.getElementById('dayCheck'); if(!el) return;
+  const ym=ymKey();
+  await ensureRec('w',curFac,ym); await ensureRec('m',curFac,ym); await ensureRec('b',curFac,ym);
+  const chk=await ensureCheck(curFac,ym);
+  const c=dayCounts(ym,cur.d);
+  const done=chk[cur.d];
+  el.className='daycheck'+(done?' done':'');
+  const fac=config.facilities.find(f=>f.id===curFac);
+  el.innerHTML=
+    `<div class="dc-sum">${cur.m}月${cur.d}日 ${fac.name} の記録</div>`
+   +`<div class="dc-sub">作業 ${c.w}名 ・ 給食 ${c.m}名 ・ 入浴 ${c.b}名`
+   +(done?`　／　確認済み（${done.at}）`:'')+`</div>`
+   +`<button class="dc-btn" id="dcBtn">${done?'確認を取り消す':'この日の記録を確認しました'}</button>`;
+  document.getElementById('dcBtn').onclick=async()=>{
+    await flushSaves();
+    if(done){ await setChecked(curFac,ym,cur.d,null); toast('確認を取り消しました'); }
+    else{
+      const now=new Date();
+      const at=`${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      await setChecked(curFac,ym,cur.d,{at,w:c.w,m:c.m,b:c.b});
+      toast('確認済みにしました');
+    }
+    renderDayCheck();
+  };
 }
 
 /* ===== 稼働率の計算 =====
@@ -869,6 +980,8 @@ async function renderMonth(){
   document.getElementById('monthSub').textContent=recType==='w'
     ? `${cur.y}年${cur.m}月 ・ セル数字＝回数（1 or 2）`
     : `${cur.y}年${cur.m}月 ・ ○＝${recType==='m'?'給食あり':'入浴あり'}${recType==='m'?'　◆＝リベルタ':''}`;
+  const legend=(scopeFac!==ALL)?'　▲＝未確認　!＝営業日だが記録なし':'　（事業所を選ぶと未確認日が表示されます）';
+  document.getElementById('monthSub').textContent+=legend;
   const holder=document.getElementById('gridHolder');
   if(users.length===0){ holder.innerHTML='<div class="empty-note">対象者が未登録です。</div>';
     const ub=document.getElementById('utilBar'); if(ub) ub.innerHTML=''; return; }
@@ -884,7 +997,13 @@ async function renderMonth(){
   for(let d=1;d<=dim;d++){
     const w=dowOf(cur.y,cur.m,d);
     const zeb=striped&&d%2===0?' zeb':'';
-    html+=`<tr class="${w===0?'sun':w===6?'sat':''}${zeb}"><td class="day">${d}</td><td class="dow">${WDAY[w]}</td>`;
+    let flag='';
+    if(chk && w!==0 && w!==6){
+      const hasRec=users.some(u=>{ const v=scopedState(recType,ym,d,u); return v==='○'||cnt(v)>0; });
+      if(!chk[d]) flag=hasRec?' unchecked':' norec';
+    }
+    const mk = flag===' norec' ? '<span title="記録なし" style="color:#C1544E">!</span>' : (flag===' unchecked'?'<span title="未確認" style="color:#E0952F">▲</span>':'');
+    html+=`<tr class="${w===0?'sun':w===6?'sat':''}${zeb}${flag}"><td class="day">${d}${mk}</td><td class="dow">${WDAY[w]}</td>`;
     let dt=0;
     users.forEach(u=>{
       const v=scopedState(recType,ym,d,u);
@@ -903,6 +1022,9 @@ async function renderMonth(){
     });
     html+=`<td class="total">${dt||''}</td></tr>`;
   }
+  // 確認状況（事業所を選択している場合のみ）
+  let chk=null;
+  if(scopeFac!==ALL){ chk=await ensureCheck(scopeFac,ym); }
   const util=calcUtilization(ym,dim,users,(d,u)=>scopedState(recType,ym,d,u));
   html+='<tr class="totrow"><td class="day"></td><td class="dow">計</td>';
   let grand=0; users.forEach(u=>{html+=`<td class="total">${totals[u]}</td>`;grand+=totals[u];});
@@ -1198,6 +1320,7 @@ async function exportExcel(){
   await flushSaves();
   const ym=ymKey();
   await ensureAll('w',ym); await ensureAll('m',ym); await ensureAll('b',ym);
+  for(const f of config.facilities) await ensureCheck(f.id,ym);
   const dim=daysInMonth(cur.y,cur.m);
   const users=mergedUsers();
   if(users.length===0){ toast('利用者が登録されていません'); return; }
@@ -1492,6 +1615,41 @@ async function exportExcel(){
   s3.columns=[{width:16},{width:10},{width:8},{width:14},{width:9},{width:9}];
   s3.eachRow((r,ri)=>r.eachCell(c=>{c.font={name:F,size:11,bold:ri===1};}));
 
+  /* ---- 確認状況（日次チェック）---- */
+  const cs=wb.addWorksheet('確認状況');
+  cs.getCell('A1').value=`${cur.y}年${cur.m}月　日次確認の状況`;
+  cs.getCell('A1').font={name:F,size:13,bold:true};
+  cs.getCell('A2').value='×＝未確認　-＝記録なし　日付が営業日(土日除く)の行のみ確認対象';
+  cs.getCell('A2').font={name:F,size:9};
+  const hrow=4;
+  cs.getCell(hrow,1).value='日付'; cs.getCell(hrow,2).value='曜日';
+  config.facilities.forEach((f,i)=>{ cs.getCell(hrow,3+i).value=f.name; });
+  for(let c=1;c<=2+config.facilities.length;c++){
+    const cell=cs.getCell(hrow,c); cell.font={name:F,size:10,bold:true}; cell.alignment=ctr; cell.border=box;
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE4F1EC'}};
+  }
+  for(let d=1;d<=dim;d++){
+    const r=hrow+d, w=dowOf(cur.y,cur.m,d);
+    cs.getCell(r,1).value=d; cs.getCell(r,2).value=WDAY[w];
+    config.facilities.forEach((f,i)=>{
+      const ck=checkCache[`${f.id}_${ym}`]||{};
+      const users2=config.users[f.id]||[];
+      const has=users2.some(u=>cnt(getState('w',f.id,ym,d,u))>0||getState('m',f.id,ym,d,u)==='○');
+      let v='';
+      if(w===0||w===6) v='';
+      else if(ck[d]) v='✓';
+      else if(has) v='×';
+      else v='-';
+      const cell=cs.getCell(r,3+i); cell.value=v; cell.alignment=ctr; cell.font={name:F,size:10};
+      if(v==='×') cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFBEFDC'}};
+      if(v==='-') cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF7E4E2'}};
+    });
+    for(let c=1;c<=2+config.facilities.length;c++) cs.getCell(r,c).border=box;
+  }
+  cs.getColumn(1).width=6; cs.getColumn(2).width=6;
+  config.facilities.forEach((f,i)=>cs.getColumn(3+i).width=12);
+  cs.pageSetup={orientation:'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:1};
+
   const buf=await wb.xlsx.writeBuffer();
   const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const fname=`作業工賃_${cur.y}年${pad(cur.m)}月.xlsx`;
@@ -1565,6 +1723,9 @@ async function switchView(v){
 /* ===== events ===== */
 document.getElementById('prevBtn').onclick=async()=>{await flushSaves();shiftDate(-1);await renderView();};
 document.getElementById('nextBtn').onclick=async()=>{await flushSaves();shiftDate(1);await renderView();};
+document.getElementById('backToday').onclick=async()=>{
+  await flushSaves(); const t=todayYMD(); cur={y:t.y,m:t.m,d:t.d}; await renderView();
+};
 document.getElementById('todayBtn').onclick=async()=>{await flushSaves();const t=new Date();cur={y:t.getFullYear(),m:t.getMonth()+1,d:t.getDate()};await renderView();};
 document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 document.querySelectorAll('#typeSegE button').forEach(b=>b.onclick=async()=>{
@@ -1624,6 +1785,11 @@ async function resync(){
 }
 window.addEventListener('visibilitychange',async()=>{
   if(document.hidden) return;
+  if(curView==='entry'&&!isToday()){
+    const t=todayYMD();
+    const dt=new Date(cur.y,cur.m-1,cur.d), now=new Date(t.y,t.m-1,t.d);
+    if(dt<now){ cur={y:t.y,m:t.m,d:t.d}; }   // 日付をまたいだら今日に戻す
+  }
   if(dirty.size>0){ await flushSaves(); }      // 先に未送信を送り切る
   if(dirty.size===0) resync();                 // 送り切れた時だけ再取得
 });
@@ -1641,6 +1807,7 @@ document.getElementById('connTestBtn').onclick=async()=>{
 };
 
 (async function(){
+  { const t=todayYMD(); cur={y:t.y,m:t.m,d:t.d}; }   // 起動時は必ず今日
   document.getElementById('saveBar').classList.add('show');
   if(!conn.url){
     document.getElementById('setupOverlay').classList.add('show');
