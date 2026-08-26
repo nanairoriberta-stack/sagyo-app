@@ -376,6 +376,7 @@
       <h3>バージョン情報</h3>
       <div class="ver-row"><span>このiPad</span><b id="verThis">-</b></div>
       <div class="ver-row"><span>最新版</span><b id="verLatest">確認中…</b></div>
+      <div class="ver-row"><span>保存先プログラム</span><b id="verGas">-</b></div>
       <div id="verStat" class="ver-stat"></div>
       <button class="btn ghost sm" id="verCheck" style="margin-top:10px">最新か確認する</button>
       <button class="btn sm" id="verReload" style="margin-top:10px;display:none">最新版に更新する</button>
@@ -483,7 +484,7 @@
 
 <script>
 /* ===== アプリのバージョン（更新のたびに上げる） ===== */
-const APP_VERSION='2026.08.26a';
+const APP_VERSION='2026.08.26b';
 
 /* ===== Storage: Googleスプレッドシート(Apps Script) + 端末内ミラー ===== */
 const conn={
@@ -544,6 +545,7 @@ async function loadAll(){
 }
 /* loadAll が成功したか（＝serverDataが信頼できるか） */
 let dataAuthoritative=false;
+let serverNeedsUpdate=false;   // 保存先プログラムが旧版か
 const store={
   async get(k){
     if(serverData&&(k in serverData)) return serverData[k];
@@ -564,28 +566,44 @@ async function saveRecordMerged(key,localObj){
   const snapshot={};
   const t0=touchedDays[key]||{};
   Object.keys(t0).forEach(d=>{ snapshot[d]={}; Object.keys(t0[d]).forEach(u=>snapshot[d][u]=1); });
+  if(Object.keys(snapshot).length===0) return null;
 
-  let remote={};
-  try{
-    const j=await gasFetch({action:'get',key,accessKey:conn.key});
-    if(j.value){ try{ remote=JSON.parse(j.value)||{}; }catch(e){ remote={}; } }
-  }catch(e){ throw e; }   // 取得できない時は保存しない（上書き事故を防ぐ）
-
-  const base=JSON.parse(JSON.stringify(remote));
-  // スナップショット分だけ反映（値は送信直前の最新をローカルから読む）
+  // 変更分だけを組み立てる（""＝削除）
+  const changes={};
   Object.keys(snapshot).forEach(day=>{
+    changes[day]={};
     Object.keys(snapshot[day]).forEach(user=>{
-      const v=(localObj[day]&&localObj[day][user])||'';
-      if(v){ if(!base[day]) base[day]={}; base[day][user]=v; }
-      else if(base[day]){ delete base[day][user]; if(Object.keys(base[day]).length===0) delete base[day]; }
+      changes[day][user]=(localObj[day]&&localObj[day][user])||'';
     });
   });
-  const json=JSON.stringify(base);
-  await gasFetch({action:'set',key,value:json,accessKey:conn.key});   // 先に送信を確定
-  if(serverData) serverData[key]=json;
-  mirrorSet(key,json);
 
+  // サーバー側で既存データに統合してもらう（他端末の記録を壊さない）
+  let merged={};
+  try{
+    const j=await gasFetch({action:'merge',key,changes,accessKey:conn.key});
+    if(j.value){ try{ merged=JSON.parse(j.value)||{}; }catch(e){ merged={}; } }
+  }catch(e){
+    if(String(e.message||'').indexOf('unknown action')<0) throw e;
+    // 旧バージョンの保存先プログラム：従来方式（取得→統合→送信）で保存
+    serverNeedsUpdate=true;
+    let remote={};
+    const g=await gasFetch({action:'get',key,accessKey:conn.key});
+    if(g.value){ try{ remote=JSON.parse(g.value)||{}; }catch(e2){ remote={}; } }
+    merged=JSON.parse(JSON.stringify(remote));
+    Object.keys(changes).forEach(day=>{
+      Object.keys(changes[day]).forEach(user=>{
+        const v=changes[day][user];
+        if(v){ if(!merged[day]) merged[day]={}; merged[day][user]=v; }
+        else if(merged[day]){ delete merged[day][user]; if(!Object.keys(merged[day]).length) delete merged[day]; }
+      });
+    });
+    await gasFetch({action:'set',key,value:JSON.stringify(merged),accessKey:conn.key});
+  }
+
+  if(serverData) serverData[key]=JSON.stringify(merged);
+  mirrorSet(key,JSON.stringify(merged));
   pendingClear(key,snapshot);
+
   // 送信できた分だけ touched から外す（送信中に増えた分は残す）
   const t1=touchedDays[key];
   if(t1){
@@ -596,14 +614,13 @@ async function saveRecordMerged(key,localObj){
     });
     if(Object.keys(t1).length===0) delete touchedDays[key];
     else{
-      // まだ未送信が残っている → dirty に戻して再送させる
       const ck=key.replace(/^rec_/,'w_').replace(/^recM_/,'m_').replace(/^recB_/,'b_');
       dirty.add(ck); persistDirty();
     }
   }
   try{ localStorage.setItem('touched',JSON.stringify(touchedDays)); }catch(e){}
   online=true; setConnBadge();
-  return base;
+  return merged;
 }
 /* 変更した日・人を記録しておく（マージ対象を限定するため） */
 const touchedDays={};
@@ -849,8 +866,8 @@ async function flushSaves(){
     const skey=storeKey(t,fid,ym);
     try{
       const merged=await saveRecordMerged(skey,recCache[k]||{});
-      // 送信中に増えたタップがある場合はローカルを優先して残す
-      if(!touchedDays[skey]){ recCache[k]=merged; dirty.delete(k); }
+      if(merged===null){ dirty.delete(k); }            // 送るものが無かった
+      else if(!touchedDays[skey]){ recCache[k]=merged; dirty.delete(k); }
     }catch(e){ online=false; setConnBadge(); }
   }
   persistDirty();
@@ -1956,7 +1973,7 @@ async function switchView(v){
 /* ===== events ===== */
 document.getElementById('prevBtn').onclick=async()=>{await flushSaves();shiftDate(-1);await renderView();};
 document.getElementById('nextBtn').onclick=async()=>{await flushSaves();shiftDate(1);await renderView();};
-document.getElementById('verCheck').onclick=()=>checkVersion(false);
+document.getElementById('verCheck').onclick=async()=>{ await checkVersion(false); await checkGas(); };
 document.getElementById('verReload').onclick=hardReload;
 document.getElementById('dateBtn').onclick=openCalendar;
 document.getElementById('calClose').onclick=()=>document.getElementById('calOverlay').classList.remove('show');
@@ -2012,6 +2029,17 @@ function showVersion(){
   if(vl) vl.textContent='SAGYO WORK LOG　v'+APP_VERSION;
   const vt=document.getElementById('verThis');
   if(vt) vt.textContent=APP_VERSION;
+}
+async function checkGas(){
+  const el=document.getElementById('verGas'); if(!el) return;
+  if(!conn.url){ el.textContent='未接続'; return; }
+  try{
+    const j=await gasFetch({action:'ping',accessKey:conn.key},8000);
+    el.textContent = (j.ver>=2)?'ver2（最新）':'旧版';
+    el.style.color = (j.ver>=2)?'#25634F':'#C1544E';
+  }catch(e){
+    el.textContent='旧版（要更新）'; el.style.color='#C1544E';
+  }
 }
 async function checkVersion(silent){
   const st=document.getElementById('verStat');
@@ -2136,6 +2164,7 @@ document.getElementById('connTestBtn').onclick=async()=>{
   setTimeout(async()=>{
     const ok=await checkVersion(true);
     if(ok===false) showUpdateBanner();
+    checkGas();
   },1500);
 })();
 
