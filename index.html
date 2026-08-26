@@ -541,27 +541,47 @@ const store={
    これにより「読み込み失敗後のタップで月ごと消える」事故を防ぎ、
    他端末の同時入力も失われにくくなる。 */
 async function saveRecordMerged(key,localObj){
+  // 送信対象を先に確定（送信中の新しいタップを巻き込まない／消さない）
+  const snapshot={};
+  const t0=touchedDays[key]||{};
+  Object.keys(t0).forEach(d=>{ snapshot[d]={}; Object.keys(t0[d]).forEach(u=>snapshot[d][u]=1); });
+
   let remote={};
   try{
     const j=await gasFetch({action:'get',key,accessKey:conn.key});
     if(j.value){ try{ remote=JSON.parse(j.value)||{}; }catch(e){ remote={}; } }
   }catch(e){ throw e; }   // 取得できない時は保存しない（上書き事故を防ぐ）
-  const base=(typeof structuredClone==='function')?structuredClone(remote):JSON.parse(JSON.stringify(remote));
-  // このセッションで触った日だけを反映する
-  const touched=touchedDays[key]||{};
-  Object.keys(touched).forEach(day=>{
-    Object.keys(touched[day]).forEach(user=>{
+
+  const base=JSON.parse(JSON.stringify(remote));
+  // スナップショット分だけ反映（値は送信直前の最新をローカルから読む）
+  Object.keys(snapshot).forEach(day=>{
+    Object.keys(snapshot[day]).forEach(user=>{
       const v=(localObj[day]&&localObj[day][user])||'';
       if(v){ if(!base[day]) base[day]={}; base[day][user]=v; }
       else if(base[day]){ delete base[day][user]; if(Object.keys(base[day]).length===0) delete base[day]; }
     });
   });
   const json=JSON.stringify(base);
+  await gasFetch({action:'set',key,value:json,accessKey:conn.key});   // 先に送信を確定
   if(serverData) serverData[key]=json;
   mirrorSet(key,json);
-  await gasFetch({action:'set',key,value:json,accessKey:conn.key});
-  // 反映済みのタッチ記録をクリアし、キャッシュも最新に
-  delete touchedDays[key];
+
+  // 送信できた分だけ touched から外す（送信中に増えた分は残す）
+  const t1=touchedDays[key];
+  if(t1){
+    Object.keys(snapshot).forEach(day=>{
+      if(!t1[day]) return;
+      Object.keys(snapshot[day]).forEach(user=>{ delete t1[day][user]; });
+      if(Object.keys(t1[day]).length===0) delete t1[day];
+    });
+    if(Object.keys(t1).length===0) delete touchedDays[key];
+    else{
+      // まだ未送信が残っている → dirty に戻して再送させる
+      const ck=key.replace(/^rec_/,'w_').replace(/^recM_/,'m_').replace(/^recB_/,'b_');
+      dirty.add(ck); persistDirty();
+    }
+  }
+  try{ localStorage.setItem('touched',JSON.stringify(touchedDays)); }catch(e){}
   online=true; setConnBadge();
   return base;
 }
@@ -769,14 +789,17 @@ async function flushSaves(){
     const skey=storeKey(t,fid,ym);
     try{
       const merged=await saveRecordMerged(skey,recCache[k]||{});
-      recCache[k]=merged;         // サーバの最新（他端末の入力込み）に同期
-      dirty.delete(k);            // 成功した分だけ外す
+      // 送信中に増えたタップがある場合はローカルを優先して残す
+      if(!touchedDays[skey]){ recCache[k]=merged; dirty.delete(k); }
     }catch(e){ online=false; setConnBadge(); }
   }
   persistDirty();
   flushing=false;
-  if(dirty.size===0) setSaveState('保存済み ✓');
-  else{ setSaveState('未送信あり：端末内に保持しています（自動で再送します）'); clearTimeout(saveTimer); saveTimer=setTimeout(flushSaves,8000); }
+  if(dirty.size===0){ setSaveState('保存済み ✓'); }
+  else{
+    setSaveState(`未送信 ${dirty.size}件：自動で再送します`);
+    clearTimeout(saveTimer); saveTimer=setTimeout(flushSaves,3000);
+  }
 }
 /* 未送信キーを端末に保存し、アプリを閉じても次回起動時に再送する */
 function persistDirty(){ try{ localStorage.setItem('dirtyKeys',JSON.stringify([...dirty])); }catch(e){} }
@@ -1887,7 +1910,10 @@ document.querySelectorAll('#typeSegE button').forEach(b=>b.onclick=async()=>{
 document.querySelectorAll('#typeSegM button').forEach(b=>b.onclick=async()=>{
   await flushSaves(); recType=b.dataset.t; syncTypeSegs(); await renderView();
 });
-document.getElementById('saveBtn').onclick=async()=>{ await flushSaves(); toast('保存しました'); };
+document.getElementById('saveBtn').onclick=async()=>{
+  for(let i=0;i<5 && dirty.size>0;i++){ await flushSaves(); if(dirty.size) await new Promise(r=>setTimeout(r,400)); }
+  toast(dirty.size===0?'保存しました':`未送信が ${dirty.size}件 あります。通信状態をご確認ください`);
+};
 document.getElementById('exportBtn').onclick=exportExcel;
 document.getElementById('exportBtn2').onclick=exportExcel;
 document.getElementById('exportBtn3').onclick=exportExcel;
