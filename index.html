@@ -47,6 +47,30 @@
   .date-main .d{font-size:20px;font-weight:800;line-height:1.1;}
   .date-main .w{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px;}
   .date-main .w.sun{color:var(--red);} .date-main .w.sat{color:var(--blue);}
+  .date-main{background:none;border:none;padding:4px 8px;border-radius:12px;}
+  .date-main:active{background:rgba(0,0,0,.05);}
+  .date-main .cal-hint{display:block;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px;}
+  .cal-overlay{position:fixed;inset:0;background:rgba(43,42,39,.45);z-index:85;display:none;align-items:center;justify-content:center;padding:20px;}
+  .cal-overlay.show{display:flex;}
+  .cal-box{background:var(--surface);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:100%;max-width:400px;padding:18px;}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .cal-head #calTitle{font-size:18px;font-weight:800;}
+  .cal-head button{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-size:22px;font-weight:800;color:var(--ink);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .cal-grid .dow{text-align:center;font-size:11.5px;font-weight:800;color:var(--muted);padding-bottom:4px;}
+  .cal-grid .dow.s{color:var(--red);} .cal-grid .dow.t{color:var(--blue);}
+  .cal-grid button{aspect-ratio:1;border-radius:11px;border:1.5px solid transparent;background:var(--surface-2);
+    font-size:16px;font-weight:800;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+  .cal-grid button.empty{background:none;pointer-events:none;}
+  .cal-grid button.sun{color:var(--red);} .cal-grid button.sat{color:var(--blue);}
+  .cal-grid button.has{background:var(--green-bg);border-color:#CFE6DD;}
+  .cal-grid button.sel{background:var(--green);color:#fff;border-color:var(--green);}
+  .cal-grid button.today{border-color:var(--amber);border-width:2.5px;}
+  .cal-grid button .dot{font-size:9px;font-weight:800;color:var(--green-d);line-height:1;}
+  .cal-grid button.sel .dot{color:#fff;}
+  .cal-foot{display:flex;gap:10px;margin-top:14px;}
+  .cal-foot button{flex:1;padding:13px;border-radius:12px;font-weight:800;font-size:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);}
+  .cal-foot .cal-today{background:var(--green);border-color:var(--green);color:#fff;}
   .today-btn{padding:9px 14px;border-radius:11px;border:1.5px solid var(--green);background:var(--green-bg);color:var(--green-d);font-weight:800;font-size:13px;}
 
   main{padding:16px;max-width:1100px;margin:0 auto;}
@@ -274,10 +298,11 @@
   <div class="facility-tabs" id="facTabs"></div>
   <div class="datebar" id="dateBar">
     <button class="navbtn" id="prevBtn">‹</button>
-    <div class="date-main">
+    <button class="date-main" id="dateBtn">
       <div class="d" id="dateD">—</div>
       <div class="w" id="dateW">—</div>
-    </div>
+      <span class="cal-hint">▼ タップで日付選択</span>
+    </button>
     <button class="navbtn" id="nextBtn">›</button>
     <button class="today-btn" id="todayBtn">今日</button>
   </div>
@@ -413,6 +438,20 @@
     <button class="dl-close" id="dlClose">閉じる</button>
   </div>
 </div>
+<div class="cal-overlay" id="calOverlay">
+  <div class="cal-box">
+    <div class="cal-head">
+      <button id="calPrev">‹</button>
+      <div id="calTitle">2026年8月</div>
+      <button id="calNext">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-foot">
+      <button class="cal-today" id="calToday">今日</button>
+      <button class="cal-close" id="calClose">閉じる</button>
+    </div>
+  </div>
+</div>
 <div id="printRoot"></div>
 
 <div class="setup-overlay" id="setupOverlay">
@@ -436,21 +475,51 @@ let serverData=null;      // 起動時に全件取得したデータ {key:value}
 let online=false;
 function connSave(url,key){ conn.url=url.trim(); conn.key=key.trim();
   localStorage.setItem('gasUrl',conn.url); localStorage.setItem('gasKey',conn.key); }
-function mirrorSet(k,v){ try{localStorage.setItem('mir_'+k,v);}catch(e){} }
+function mirrorSet(k,v){
+  try{ localStorage.setItem('mir_'+k,v); }
+  catch(e){
+    // 容量オーバー時：古い月のミラーを捨てて再試行（落ちる原因になるため）
+    try{
+      const now=new Date(); const keep=new Set();
+      for(let i=0;i<3;i++){ const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+        keep.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
+      Object.keys(localStorage).forEach(key=>{
+        if(!key.startsWith('mir_')) return;
+        const m=key.match(/(\d{4}-\d{2})$/);
+        if(m && !keep.has(m[1])) localStorage.removeItem(key);
+      });
+      localStorage.setItem('mir_'+k,v);
+    }catch(e2){}
+  }
+}
 function mirrorGet(k){ try{return localStorage.getItem('mir_'+k);}catch(e){return null;} }
 
-async function gasFetch(body){
-  const res=await fetch(conn.url,{method:'POST',body:JSON.stringify(body)}); // text/plain → プリフライト回避
-  if(!res.ok) throw new Error('http '+res.status);
-  const j=await res.json();
-  if(!j.ok) throw new Error(j.error||'gas error');
-  return j;
+async function gasFetch(body,ms){
+  // タイムアウトを設けて、応答待ちが積み上がるのを防ぐ
+  const ctl=(typeof AbortController!=='undefined')?new AbortController():null;
+  const to=setTimeout(()=>{ try{ctl&&ctl.abort();}catch(e){} }, ms||20000);
+  try{
+    const opt={method:'POST',body:JSON.stringify(body)};
+    if(ctl) opt.signal=ctl.signal;
+    const res=await fetch(conn.url,opt);
+    if(!res.ok) throw new Error('http '+res.status);
+    const j=await res.json();
+    if(!j.ok) throw new Error(j.error||'gas error');
+    return j;
+  } finally { clearTimeout(to); }
 }
 async function loadAll(){
   if(!conn.url) throw new Error('未設定');
   const j=await gasFetch({action:'getall',accessKey:conn.key});
   serverData=j.data||{};
-  Object.entries(serverData).forEach(([k,v])=>mirrorSet(k,v));
+  // ミラーは直近3か月分だけ（端末の容量オーバーによる強制終了を防ぐ）
+  const now=new Date(); const keep=new Set();
+  for(let i=0;i<3;i++){ const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    keep.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); }
+  Object.entries(serverData).forEach(([k,v])=>{
+    const m=k.match(/(\d{4}-\d{2})$/);
+    if(!m || keep.has(m[1]) || k==='config') mirrorSet(k,v);
+  });
   online=true; dataAuthoritative=true; setConnBadge();
   return serverData;
 }
@@ -498,11 +567,15 @@ async function saveRecordMerged(key,localObj){
 }
 /* 変更した日・人を記録しておく（マージ対象を限定するため） */
 const touchedDays={};
+let touchedSaveTimer=null;
 function markTouched(key,day,user){
   if(!touchedDays[key]) touchedDays[key]={};
   if(!touchedDays[key][day]) touchedDays[key][day]={};
   touchedDays[key][day][user]=1;
-  try{ localStorage.setItem('touched',JSON.stringify(touchedDays)); }catch(e){}
+  clearTimeout(touchedSaveTimer);
+  touchedSaveTimer=setTimeout(()=>{
+    try{ localStorage.setItem('touched',JSON.stringify(touchedDays)); }catch(e){}
+  },600);
 }
 function setConnBadge(){
   const el=document.getElementById('connBadge'); if(!el) return;
@@ -682,7 +755,7 @@ function scheduleSave(t,fid,ym){
   persistDirty();
   setSaveState('未保存の変更あり（自動保存されます）');
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(flushSaves,700);
+  saveTimer=setTimeout(flushSaves,1200);
 }
 let flushing=false;
 async function flushSaves(){
@@ -715,8 +788,7 @@ function restoreDirty(){
   }catch(e){}
 }
 function setSaveState(t){ const el=document.getElementById('saveState'); if(el)el.textContent=t; }
-window.addEventListener('visibilitychange',()=>{ if(document.hidden) flushSaves(); });
-window.addEventListener('pagehide',()=>flushSaves());
+window.addEventListener('pagehide',()=>{ try{ flushSaves(); }catch(e){} });
 
 /* ===== toast ===== */
 let tT; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),1600); }
@@ -752,6 +824,8 @@ function renderDateBar(){
   we.textContent=showDay?`${cur.y}年 (${WDAY[w]})`:'月を選択';
   we.className='w'+(showDay&&w===0?' sun':showDay&&w===6?' sat':'');
   document.getElementById('todayBtn').style.display=showDay?'':'none';
+  const hint=document.querySelector('.cal-hint');
+  if(hint) hint.textContent=showDay?'▼ タップで日付選択':'▼ タップで月を選択';
 }
 function shiftDate(dir){
   if(curView==='entry'){
@@ -769,8 +843,19 @@ function syncTypeSegs(){
 }
 
 /* ===== ENTRY ===== */
-/* その月の累計（当日を含む・表示中の事業所のみ） */
+/* その月の累計（キャッシュ付き：毎タップの再計算を避ける） */
+let totCache={}, totCacheKey='';
+function invalidateTotals(u){
+  if(u) delete totCache[u]; else totCache={};
+}
 function monthTotalFor(u){
+  const ck=`${recType}_${curFac}_${ymKey()}`;
+  if(totCacheKey!==ck){ totCacheKey=ck; totCache={}; }
+  if(totCache[u]) return totCache[u];
+  const r=calcMonthTotal(u);
+  totCache[u]=r; return r;
+}
+function calcMonthTotal(u){
   const ym=ymKey(), dim=daysInMonth(cur.y,cur.m);
   if(recType==='w'){
     let days=0,ses=0,yen=0;
@@ -836,7 +921,9 @@ function attachBadge(btn,u){
     const nv=v==='休'?'欠':v==='欠'?'':'休';
     setStateVal('w',curFac,ymKey(),cur.d,u,nv);
     scheduleSave('w',curFac,ymKey());
+    invalidateTotals(u);
     refreshCard(btn,u); updateCounts();
+    scheduleDayCheck();
   };
 }
 async function renderEntry(){
@@ -871,7 +958,9 @@ async function renderEntry(){
       const nv=t==='w'?toggleSession(cv,activeSess):(cv==='○'?'':'○');
       setStateVal(t,curFac,ymKey(),cur.d,u,nv);
       scheduleSave(t,curFac,ymKey());
+      invalidateTotals(u);
       refreshCard(b,u); updateCounts();
+      scheduleDayCheck();
     };
     attachBadge(b,u);
     grid.appendChild(b);
@@ -879,6 +968,55 @@ async function renderEntry(){
   updateCounts();
   renderDateWarn();
   renderDayCheck();
+}
+
+/* ===== カレンダーで日付選択 ===== */
+let calY=null, calM=null;
+async function openCalendar(){
+  calY=cur.y; calM=cur.m;
+  await renderCalendar();
+  document.getElementById('calOverlay').classList.add('show');
+}
+async function renderCalendar(){
+  const ym=`${calY}-${pad(calM)}`;
+  // その月に記録がある日を調べる（表示中の事業所／表示中の種類）
+  let marks={};
+  try{
+    await ensureRec(recType,curFac,ym);
+    const users=(recType==='b')?(config.bathUsers[curFac]||[]):(config.users[curFac]||[]);
+    const dim=daysInMonth(calY,calM);
+    for(let d=1;d<=dim;d++){
+      let n=0;
+      users.forEach(u=>{ const v=getState(recType,curFac,ym,d,u); if(v==='○'||cnt(v)>0) n++; });
+      if(n) marks[d]=n;
+    }
+  }catch(e){}
+  document.getElementById('calTitle').textContent=`${calY}年${calM}月`;
+  const g=document.getElementById('calGrid');
+  const t=todayYMD();
+  let html='';
+  ['日','月','火','水','木','金','土'].forEach((w,i)=>{
+    html+=`<div class="dow${i===0?' s':i===6?' t':''}">${w}</div>`;
+  });
+  const first=new Date(calY,calM-1,1).getDay();
+  for(let i=0;i<first;i++) html+='<button class="empty"></button>';
+  const dim=daysInMonth(calY,calM);
+  for(let d=1;d<=dim;d++){
+    const w=dowOf(calY,calM,d);
+    const sel=(calY===cur.y&&calM===cur.m&&d===cur.d);
+    const isT=(calY===t.y&&calM===t.m&&d===t.d);
+    const cls=['',w===0?'sun':w===6?'sat':'',marks[d]?'has':'',sel?'sel':'',isT?'today':''].join(' ').trim();
+    html+=`<button class="${cls}" data-d="${d}">${d}${marks[d]?`<span class="dot">●${marks[d]}</span>`:''}</button>`;
+  }
+  g.innerHTML=html;
+  g.querySelectorAll('button[data-d]').forEach(b=>{
+    b.onclick=async()=>{
+      await flushSaves();
+      cur={y:calY,m:calM,d:+b.dataset.d};
+      document.getElementById('calOverlay').classList.remove('show');
+      await renderView();
+    };
+  });
 }
 
 /* ===== 日付ミス防止：今日以外を編集中なら警告 ===== */
@@ -917,6 +1055,8 @@ function dayCounts(ym,day){
   ub.forEach(u=>{ if(getState('b',curFac,ym,day,u)==='○') b++; });
   return {w,m,b};
 }
+let dcTimer=null;
+function scheduleDayCheck(){ clearTimeout(dcTimer); dcTimer=setTimeout(()=>renderDayCheck(),500); }
 async function renderDayCheck(){
   const el=document.getElementById('dayCheck'); if(!el) return;
   const ym=ymKey();
@@ -1723,6 +1863,15 @@ async function switchView(v){
 /* ===== events ===== */
 document.getElementById('prevBtn').onclick=async()=>{await flushSaves();shiftDate(-1);await renderView();};
 document.getElementById('nextBtn').onclick=async()=>{await flushSaves();shiftDate(1);await renderView();};
+document.getElementById('dateBtn').onclick=openCalendar;
+document.getElementById('calClose').onclick=()=>document.getElementById('calOverlay').classList.remove('show');
+document.getElementById('calOverlay').onclick=e=>{ if(e.target.id==='calOverlay') e.target.classList.remove('show'); };
+document.getElementById('calPrev').onclick=async()=>{ calM--; if(calM<1){calM=12;calY--;} await renderCalendar(); };
+document.getElementById('calNext').onclick=async()=>{ calM++; if(calM>12){calM=1;calY++;} await renderCalendar(); };
+document.getElementById('calToday').onclick=async()=>{
+  await flushSaves(); const t=todayYMD(); cur={y:t.y,m:t.m,d:t.d};
+  document.getElementById('calOverlay').classList.remove('show'); await renderView();
+};
 document.getElementById('backToday').onclick=async()=>{
   await flushSaves(); const t=todayYMD(); cur={y:t.y,m:t.m,d:t.d}; await renderView();
 };
@@ -1779,19 +1928,36 @@ async function testAndSaveConn(url,key,statEl){
 }
 async function resync(){
   if(!conn.url) return;
-  if(dirty.size>0) return;   // 未送信があるうちは再取得しない（巻き戻し防止）
-  try{ await loadAll(); Object.keys(recCache).forEach(k=>delete recCache[k]); config=null; await loadConfig(); await renderView(); }
-  catch(e){ online=false; setConnBadge(); }
+  if(dirty.size>0) return;
+  try{
+    await loadAll();
+    Object.keys(recCache).forEach(k=>delete recCache[k]);
+    invalidateTotals();
+    Object.keys(checkCache).forEach(k=>delete checkCache[k]);
+    config=null; await loadConfig();
+    await renderView();
+    lastSync=Date.now();
+  }catch(e){ online=false; setConnBadge(); }
 }
+let lastSync=Date.now();
+let resyncing=false;
 window.addEventListener('visibilitychange',async()=>{
   if(document.hidden) return;
+  if(resyncing) return;
+  let dateChanged=false;
   if(curView==='entry'&&!isToday()){
     const t=todayYMD();
     const dt=new Date(cur.y,cur.m-1,cur.d), now=new Date(t.y,t.m-1,t.d);
-    if(dt<now){ cur={y:t.y,m:t.m,d:t.d}; }   // 日付をまたいだら今日に戻す
+    if(dt<now){ cur={y:t.y,m:t.m,d:t.d}; dateChanged=true; }
   }
-  if(dirty.size>0){ await flushSaves(); }      // 先に未送信を送り切る
-  if(dirty.size===0) resync();                 // 送り切れた時だけ再取得
+  if(dirty.size>0){ await flushSaves(); }
+  // 再取得は「未送信なし」かつ「前回から3分以上経過」のときだけ（負荷軽減）
+  if(dirty.size===0 && Date.now()-lastSync>180000){
+    resyncing=true;
+    try{ await resync(); }finally{ resyncing=false; lastSync=Date.now(); }
+  }else if(dateChanged){
+    await renderView();
+  }
 });
 
 document.getElementById('suBtn').onclick=async()=>{
